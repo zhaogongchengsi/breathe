@@ -5,14 +5,14 @@ import type {
 } from "..";
 import { BreatheConfig } from "../../config";
 
-export function pagesServeMiddleware(root: string, config: BreatheConfig) {
+export function filesRouterMiddleware(root: string, config: BreatheConfig) {
   return (
     req: BreatheServerRequest,
     res: BreatheServerResponse,
     next: NextHandler
   ) => {
-    // res.setHeader("Accept", "text/html");
-    res.html = "<h1> hello world </h1>";
+    // console.log(req.url)
+    // console.log("pages", config.pages);
     next();
   };
 }
