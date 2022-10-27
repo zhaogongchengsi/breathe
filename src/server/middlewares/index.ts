@@ -1,0 +1,1 @@
+export { staicServeMiddleware } from "./static";

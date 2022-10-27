@@ -1,0 +1,13 @@
+{
+    "server": {
+        "port": 3030
+    },
+    "build": {
+        "outdir": "./_dist"
+    },
+    "lib": "./lib",
+    "pages": "./pages",
+    "layouts": "./layouts",
+    "staticDir": "./public",
+    "components": "./components"
+}

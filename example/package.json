@@ -1,0 +1,13 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "bs --port=3030",
+    "build": "bs --outDir=dist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

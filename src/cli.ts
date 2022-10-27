@@ -1,18 +1,20 @@
 import { cac } from "cac";
 
-import { createDevServer } from "./index";
+import { createDevServer, build } from "./index";
 
 const cli = cac("breathe");
 
 export interface ServerOption {
-  host: string;
-  port: number;
+  host?: string;
+  port?: number;
+}
+
+export interface BuildOption {
+  outdir?: string;
 }
 
 export function createCli() {
-  const root = process.cwd();
-
-  console.log("cwd", root);
+  const cwdPath = process.cwd();
 
   // npm run bs dev
   cli
@@ -22,9 +24,18 @@ export function createCli() {
     .option("--host [host]", `[string] specify hostname`)
     .option("--port <port>", `[number] specify port`)
     .action((root: string, options: ServerOption) => {
-      console.log("actions", root, options);
-      createDevServer();
+      createDevServer(cwdPath, {
+        host: options.host,
+        port: options.port,
+        configPath: root,
+      });
     });
 
+  cli
+    .command("build [root]", "build")
+    .option("--outDir <dir>", `[string] output directory (default: dist)`)
+    .action((root: string, option: BuildOption) => {
+      build();
+    });
   return cli;
 }
