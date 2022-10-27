@@ -7,18 +7,22 @@ import {
   resolveConfig,
 } from "../config";
 
-import connect from "connect";
 import polka from "polka";
 import colors from "picocolors";
-import { staicServeMiddleware } from "./middlewares";
+import { staicServeMiddleware, pagesServeMiddleware } from "./middlewares";
 import { parse, resolve } from "path";
 import compression from "compression";
-
-import http from "node:http";
+import { IncomingMessage, ServerResponse } from "http";
 
 export interface Optopns extends ServerOption {
   configPath: string;
 }
+
+export interface BreatheServerResponse extends ServerResponse<IncomingMessage> {
+  html?: string;
+}
+
+export interface BreatheServerRequest extends IncomingMessage {}
 
 export async function createDevServer(root: string, option: Optopns) {
   const conf = await resolveConfig(root, option.configPath ?? CONFIG_NAME);
@@ -32,15 +36,21 @@ export async function createDevServer(root: string, option: Optopns) {
 
   const staticPath = resolve(root, staticDir);
 
-  polka()
-    .use(compression(), staicServeMiddleware(staticPath))
+  const app = polka();
+
+  app
+    .use(
+      compression(),
+      staicServeMiddleware(staticPath),
+      pagesServeMiddleware()
+    )
+
+    .get("/", (req: BreatheServerRequest, res: BreatheServerResponse) => {
+      res.end(res.html);
+    })
 
     .listen(port, host, (err: any) => {
       if (err) throw err;
       console.log(colors.green(`http://${host}:${port}`));
     });
-
-  //   http.createServer(app).listen(port, host, () => {
-  //
-  //   });
 }

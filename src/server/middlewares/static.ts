@@ -1,5 +1,5 @@
-import { IncomingMessage, ServerResponse } from "http";
 import sirv, { NextHandler } from "sirv";
+import type { BreatheServerResponse, BreatheServerRequest } from "..";
 
 export function staicServeMiddleware(dir: string) {
   const serve = sirv(dir, {
@@ -8,10 +8,10 @@ export function staicServeMiddleware(dir: string) {
     dev: true,
   });
 
-  return function staicServeMiddlewareFunc(
-    req: IncomingMessage,
-    res: ServerResponse<IncomingMessage>,
-    next: NextHandler | undefined
+  return function (
+    req: BreatheServerRequest,
+    res: BreatheServerResponse,
+    next: NextHandler
   ) {
     serve(req, res, next);
   };
