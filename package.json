@@ -71,6 +71,7 @@
     "vitest": "^0.23.4"
   },
   "dependencies": {
+    "@polka/url": "^0.5.0",
     "cac": "^6.7.14",
     "compression": "^1.7.4",
     "connect": "^3.7.0",

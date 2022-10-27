@@ -4,6 +4,8 @@ import type {
   NextHandler,
 } from "..";
 import { BreatheConfig } from "../../config";
+// @ts-ignore
+import polkaParse from "@polka/url";
 
 export function urlParseMiddleware(root: string, config: BreatheConfig) {
   return (
@@ -11,17 +13,7 @@ export function urlParseMiddleware(root: string, config: BreatheConfig) {
     res: BreatheServerResponse,
     next: NextHandler
   ) => {
-    const isGet = req.method === "GET";
-    const url = req.url;
-
-    if (!isGet) {
-      next();
-    }
-
-    
-
-
+    res.parse = polkaParse(req);
     next();
   };
 }
-

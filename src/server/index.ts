@@ -15,7 +15,6 @@ import {
   filesRouterMiddleware,
   urlParseMiddleware,
 } from "./middlewares";
-import { parse, resolve } from "path";
 import compression from "compression";
 import { IncomingMessage, ServerResponse } from "http";
 
@@ -24,26 +23,17 @@ export interface Optopns extends ServerOption {
 }
 
 export interface ParseUrlInfo {
-  /**
-   * 是否是页面路由
-   */
-  isPage: boolean;
-
-  /**
-   * 指定处理的中间件
-   */
-  processName: ProcessName;
+  search: string | null | undefined;
+  query: string | null | undefined;
+  pathname: string;
+  path: string;
+  href: string;
+  _raw: string;
 }
-
-type ProcessName =
-  | "no-match"
-  | "staicServeMiddleware"
-  | "filesRouterMiddleware"
-  | "pagesServeMiddleware";
 
 export interface BreatheServerResponse extends ServerResponse<IncomingMessage> {
   html?: string;
-  parseUrl?: ParseUrlInfo;
+  parse?: ParseUrlInfo;
 }
 
 export type NextHandler = () => void | Promise<void>;

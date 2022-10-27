@@ -4,9 +4,9 @@ import { fileExist } from "../fs";
 import { _require } from "../module";
 
 describe("fs", () => {
-  it("fileExist", async () => {
-    const is1 = await fileExist(join(__dirname, "test.json"));
-    const is2 = await fileExist(join(__dirname, "test1"));
+  it("fileExist", () => {
+    const is1 = fileExist(join(__dirname, "test.json"));
+    const is2 = fileExist(join(__dirname, "test1"));
 
     expect(is1).toBe(true);
     expect(is2).toBe(false);
