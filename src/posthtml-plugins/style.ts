@@ -1,9 +1,11 @@
 import { join, parse } from "path";
 import PostHTML from "posthtml";
 
-export interface PostHtmlStylePluginOptons {}
+export interface PostHtmlStylePluginOptons {
+  mode: "development" | "production";
+}
 
-export function posthtmlStylePlugin(options?: PostHtmlStylePluginOptons) {
+export function posthtmlStylePlugin(options: PostHtmlStylePluginOptons) {
   return async (tree: PostHTML.Node) => {
     // @ts-ignore
     tree.match({ tag: "link" }, (node) => {
@@ -13,11 +15,13 @@ export function posthtmlStylePlugin(options?: PostHtmlStylePluginOptons) {
         return node;
       }
 
+      const isDev = options.mode === "development";
+
       // @ts-ignore
       const { ext, name, dir, root } = parse(attrs.href);
       const type = ext.replace(".", "");
 
-      const url = [root, dir, `${name}.css`, `?type=${type}`]
+      const url = [root, dir, `${name}.css`, isDev ? `?type=${type}` : ""]
         .filter(Boolean)
         .join("/");
 
