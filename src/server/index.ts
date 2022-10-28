@@ -17,6 +17,7 @@ import {
 } from "./middlewares";
 import compression from "compression";
 import { IncomingMessage, ServerResponse } from "http";
+import { Html } from "../html";
 
 export interface Optopns extends ServerOption {
   configPath: string;
@@ -32,7 +33,7 @@ export interface ParseUrlInfo {
 }
 
 export interface BreatheServerResponse extends ServerResponse<IncomingMessage> {
-  html?: string;
+  html?: Html;
   parse?: ParseUrlInfo;
 }
 
@@ -70,8 +71,9 @@ export async function createDevServer(root: string, option: Optopns) {
   app
     .use(compression(), ...serverMidds)
 
-    .get("*", (req: BreatheServerRequest, res: BreatheServerResponse) => {
-      res.end(res.html);
+    .get("*", async (req: BreatheServerRequest, res: BreatheServerResponse) => {
+    //   const html = await res.html?.render();
+      res.end("<h1> defaule hello world </h1>");
     })
 
     .listen(port, host, (err: any) => {

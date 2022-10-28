@@ -11,8 +11,8 @@ export function pagesServeMiddleware(root: string, config: BreatheConfig) {
     res: BreatheServerResponse,
     next: NextHandler
   ) => {
-    // res.setHeader("Accept", "text/html");
-    res.html = "<h1> hello world </h1>";
+
+
     next();
   };
 }
