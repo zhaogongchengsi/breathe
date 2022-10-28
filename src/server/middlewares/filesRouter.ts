@@ -4,8 +4,7 @@ import type {
   NextHandler,
 } from "..";
 import { BreatheConfig } from "../../config";
-import { join } from "path";
-
+import { join, parse } from "path";
 
 export function filesRouterMiddleware(root: string, { pages }: BreatheConfig) {
   return (
@@ -15,19 +14,17 @@ export function filesRouterMiddleware(root: string, { pages }: BreatheConfig) {
   ) => {
     if (req.method !== "GET") {
       next();
+      return;
     }
 
-    let url = res.parse?.pathname;
-
-    if (!url || url === "/") {
-      url = "index.html";
+    if (!res.parse?.pathname) {
+      next();
+      return;
     }
 
-    const page = join(root, pages, url);
+    let url = parse(res.parse!.pathname);
+    const page = join(root, pages, url.dir, url.name || "index");
 
-    console.log(page);
-    // console.log(req.url)
-    // console.log("pages", config.pages);
     next();
   };
 }
