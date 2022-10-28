@@ -9,8 +9,9 @@ import { requestType } from "../../utils";
 
 export function pagesServeMiddleware(root: string, config: BreatheConfig) {
   const html = new Html({
-    root: root,
     ...config,
+    root: root,
+    mode: "development",
   });
 
   return async (
@@ -35,6 +36,7 @@ export function pagesServeMiddleware(root: string, config: BreatheConfig) {
     }
 
     const htmlStr = await html.render(url);
+    
     res.end(htmlStr);
   };
 }

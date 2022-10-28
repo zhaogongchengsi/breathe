@@ -6,21 +6,19 @@ export interface PostHtmlStylePluginOptons {
 }
 
 export function posthtmlStylePlugin(options: PostHtmlStylePluginOptons) {
-  return async (tree: PostHTML.Node) => {
+  return (tree: PostHTML.Node) => {
     // @ts-ignore
-    tree.match({ tag: "link" }, (node) => {
+    tree.match({ tag: "link", attrs: { rel: "stylesheet" } }, (node) => {
       const { attrs } = node;
       // @ts-ignore
       if (!attrs.href) {
         return node;
       }
-
       const isDev = options.mode === "development";
-
       // @ts-ignore
       const { ext, name, dir, root } = parse(attrs.href);
       const type = ext.replace(".", "");
-
+      
       const url = [root, dir, `${name}.css`, isDev ? `?type=${type}` : ""]
         .filter(Boolean)
         .join("/");

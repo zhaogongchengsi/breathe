@@ -20,7 +20,6 @@ describe("style loder", () => {
     const res = await posthtml([
       posthtmlStylePlugin({ mode: "production" }),
     ]).process(html);
-    console.log(res.html);
     expect(res.html).toContain("index.css");
   });
 });

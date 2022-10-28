@@ -26,6 +26,7 @@ export function styleServeMiddleware(root: string, config: BreatheConfig) {
 
     if (requestType(url) != "style") {
       next();
+      return
     }
 
     res.end(` .main { color: red; } `);

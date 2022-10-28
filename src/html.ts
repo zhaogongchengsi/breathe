@@ -5,12 +5,15 @@ import posthtmlModule from "posthtml-modules";
 // @ts-ignore
 import posthtmlInclude from "posthtml-include";
 import { join, parse, resolve } from "path";
+import { posthtmlStylePlugin } from "./posthtml-plugins";
 
+type mode = "development" | "production";
 export interface HtmlOptions {
   layouts: string;
   components: string;
   pages: string;
   root: string;
+  mode: mode;
 }
 
 export class Html {
@@ -21,9 +24,11 @@ export class Html {
   body: string;
 
   file: string | undefined;
+  mode: mode;
 
   constructor(config: HtmlOptions) {
     this.config = config;
+    this.mode = config.mode;
     this.head = [];
     this.body = "";
   }
@@ -70,9 +75,14 @@ export class Html {
       root: config.root,
     });
 
+    const stylePlugin = posthtmlStylePlugin({
+      mode: this.mode,
+    });
+
     const htmlModulesMidd = posthtmlModule({
       root: config.root,
       from: resolve(config.root, config.layouts),
+      plugins: () => [stylePlugin],
     });
 
     return new Promise((res, rej) => {
