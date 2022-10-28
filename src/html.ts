@@ -1,10 +1,13 @@
 import { readFile } from "fs/promises";
 import posthtml from "posthtml";
+import { join, parse, resolve } from "path";
 // @ts-ignore
 import posthtmlModule from "posthtml-modules";
 // @ts-ignore
 import posthtmlInclude from "posthtml-include";
-import { join, parse, resolve } from "path";
+// @ts-ignore
+import postcss from "posthtml-postcss";
+
 import { posthtmlStylePlugin } from "./posthtml-plugins";
 
 type mode = "development" | "production";
@@ -54,7 +57,7 @@ export class Html {
     try {
       file = await readFile(path);
     } catch (err) {
-      throw err;
+      throw new Error(`File read failed -->${path}`);
     }
 
     return file.toString();
