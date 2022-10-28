@@ -12,8 +12,8 @@ import colors from "picocolors";
 import {
   staicServeMiddleware,
   pagesServeMiddleware,
-  filesRouterMiddleware,
   urlParseMiddleware,
+  styleServeMiddleware,
 } from "./middlewares";
 import compression from "compression";
 import { IncomingMessage, ServerResponse } from "http";
@@ -54,8 +54,8 @@ export async function createDevServer(root: string, option: Optopns) {
   const middlewares = [
     urlParseMiddleware,
     staicServeMiddleware,
-    filesRouterMiddleware,
     pagesServeMiddleware,
+    styleServeMiddleware,
   ];
 
   const app = polka({
@@ -72,7 +72,7 @@ export async function createDevServer(root: string, option: Optopns) {
     .use(compression(), ...serverMidds)
 
     .get("*", async (req: BreatheServerRequest, res: BreatheServerResponse) => {
-    //   const html = await res.html?.render();
+      //   const html = await res.html?.render();
       res.end("<h1> defaule hello world </h1>");
     })
 

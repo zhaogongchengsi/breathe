@@ -1,7 +1,5 @@
 import { readFile } from "fs/promises";
-import { BreatheConfig } from "./config";
 import posthtml from "posthtml";
-
 // @ts-ignore
 import posthtmlModule from "posthtml-modules";
 // @ts-ignore
@@ -30,14 +28,16 @@ export class Html {
     this.body = "";
   }
 
-  public parsePath(pathname: string, basepath?: string) {
+  public parsePath(
+    pathname: string,
+    basepath?: string,
+    filext: string = ".html"
+  ) {
     const { config } = this;
     let { dir, name, ext } = parse(pathname);
-
-    const _ext = ext === ".html" ? ext : ".html";
+    const _ext = ext === filext ? filext : filext;
     const _name = ["", "''", "/"].includes(name) ? "index" : name;
     const _dir = ["/"].includes(dir) ? "" : dir;
-
     return resolve(basepath ?? config.root, join(_dir, _name + _ext));
   }
 
@@ -82,7 +82,9 @@ export class Html {
         .then((result) => {
           res(result.html);
         })
-        .catch(rej);
+        .catch((err) => {
+          rej(new Error(`The module does not exist, the path is: ${err.path}`));
+        });
     });
   }
 }

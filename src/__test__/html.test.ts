@@ -27,8 +27,6 @@ describe("html", () => {
     expect(path4).toBe(join(root, "index.html"));
     expect(path5).toBe(join(root, "index/index.html"));
     expect(path6).toBe(join(root, "index.html"));
-
-
   });
 
   it("read pages file", async () => {
@@ -40,5 +38,14 @@ describe("html", () => {
     const file = await html.readPagesFile("index.html");
     const str = await html.compiler(file!);
     expect(str).not.toBe("");
+  });
+
+  it.skip("Module does not exist", async () => {
+    const cop = async () => {
+      const file = await html.readPagesFile("abc.html");
+      return await html.compiler(file!);
+    };
+
+    expect(cop).toThrowError(/^module does not exist$/);
   });
 });

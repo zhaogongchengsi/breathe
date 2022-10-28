@@ -4,15 +4,9 @@ import type {
   NextHandler,
 } from "..";
 import { BreatheConfig } from "../../config";
-import { Html } from "../../html";
 import { requestType } from "../../utils";
 
-export function pagesServeMiddleware(root: string, config: BreatheConfig) {
-  const html = new Html({
-    root: root,
-    ...config,
-  });
-
+export function styleServeMiddleware(root: string, config: BreatheConfig) {
   return async (
     req: BreatheServerRequest,
     res: BreatheServerResponse,
@@ -30,11 +24,10 @@ export function pagesServeMiddleware(root: string, config: BreatheConfig) {
       return;
     }
 
-    if (requestType(url) != "html") {
+    if (requestType(url) != "style") {
       next();
     }
 
-    const htmlStr = await html.render(url);
-    res.end(htmlStr);
+    res.end(` .main { color: red; } `);
   };
 }
