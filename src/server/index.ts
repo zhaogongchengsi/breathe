@@ -38,6 +38,7 @@ export interface ErrorInfo {
 }
 
 export interface BreatheServerResponse extends ServerResponse<IncomingMessage> {
+  _url?: string;
   html?: string;
   err?: ErrorInfo;
   parse?: ParseUrlInfo;

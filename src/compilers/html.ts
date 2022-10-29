@@ -72,7 +72,7 @@ export function posthtmlStylePlugin(options: PostHtmlStylePluginOptons) {
       const { ext, name, dir, root } = parse(attrs.href);
       const type = ext.replace(".", "");
 
-      const url = [root, dir, `${name}.css`, isDev ? `?type=${type}` : ""]
+      const url = [root, dir, `${name}.css${isDev ? `?type=${type}` : ""}`]
         .filter(Boolean)
         .join("/");
 

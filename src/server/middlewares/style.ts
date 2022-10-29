@@ -4,7 +4,9 @@ import type {
   NextHandler,
 } from "..";
 import { BreatheConfig } from "../../config";
-import { requestType } from "../../utils";
+import { readCodeFile, findFile, compilerSassStyle } from "../../compilers";
+import { parse, resolve } from "path";
+import { fromJSON } from "postcss";
 
 export function styleServeMiddleware(root: string, config: BreatheConfig) {
   return async (
@@ -18,18 +20,25 @@ export function styleServeMiddleware(root: string, config: BreatheConfig) {
     }
 
     const url = res.parse?.pathname;
-
     if (!url) {
       next();
       return;
     }
 
-    if (requestType(url) != "style") {
+    if (!url.endsWith(".css")) {
       next();
-      return
+      return;
     }
 
-    // compilerSass();
+    // @ts-ignore
+    const { type } = req.query;
+
+    if (type === "scss") {
+    }
+
+    // if (res.parse?.query === "type=scss") {
+    //   const cssPath = resolve(root, parse(url).name + "scss");
+    // }
 
     res.end(` .main { color: red; } `);
   };

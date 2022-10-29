@@ -24,7 +24,7 @@ export function pagesServeMiddleware(root: string, config: BreatheConfig) {
       return;
     }
 
-    let url = res.parse?.pathname;
+    let url = res._url;
 
     if (!url) {
       next();

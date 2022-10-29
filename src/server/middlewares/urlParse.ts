@@ -13,7 +13,9 @@ export function urlParseMiddleware(root: string, config: BreatheConfig) {
     res: BreatheServerResponse,
     next: NextHandler
   ) => {
-    res.parse = polkaParse(req);
+    const info = polkaParse(req);
+    res._url = info.pathname;
+    res.parse = info;
     next();
   };
 }
