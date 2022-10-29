@@ -5,16 +5,19 @@ import { join, parse, resolve } from "path";
 import posthtmlModule from "posthtml-modules";
 // @ts-ignore
 import posthtmlInclude from "posthtml-include";
+import PostHTML from "posthtml";
+import { Mode } from ".";
 
-import { posthtmlStylePlugin } from "./posthtml-plugins";
+export interface PostHtmlStylePluginOptons {
+  mode: Mode;
+}
 
-type mode = "development" | "production";
 export interface HtmlOptions {
   layouts: string;
   components: string;
   pages: string;
   root: string;
-  mode: mode;
+  mode: Mode;
 }
 
 export class Html {
@@ -25,7 +28,7 @@ export class Html {
   body: string;
 
   file: string | undefined;
-  mode: mode;
+  mode: Mode;
 
   constructor(config: HtmlOptions) {
     this.config = config;
@@ -98,4 +101,34 @@ export class Html {
         });
     });
   }
+}
+
+export function posthtmlStylePlugin(options: PostHtmlStylePluginOptons) {
+  const isDev = options.mode === "development";
+
+  return (tree: PostHTML.Node) => {
+    // @ts-ignore
+    tree.match({ tag: "link", attrs: { rel: "stylesheet" } }, (node) => {
+      const { attrs } = node;
+      // @ts-ignore
+      if (!attrs.href) {
+        return node;
+      }
+
+      // @ts-ignore
+      const { ext, name, dir, root } = parse(attrs.href);
+      const type = ext.replace(".", "");
+
+      const url = [root, dir, `${name}.css`, isDev ? `?type=${type}` : ""]
+        .filter(Boolean)
+        .join("/");
+
+      return Object.assign(node, {
+        attrs: {
+          ...attrs,
+          href: url,
+        },
+      });
+    });
+  };
 }

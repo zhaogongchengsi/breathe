@@ -17,7 +17,7 @@ import {
 } from "./middlewares";
 import compression from "compression";
 import { IncomingMessage, ServerResponse } from "http";
-import { Html } from "../html";
+import { Html } from "../compilers/html";
 
 export interface Optopns extends ServerOption {
   configPath: string;

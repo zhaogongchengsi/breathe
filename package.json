@@ -90,6 +90,7 @@
     "posthtml": "^0.16.6",
     "posthtml-include": "^1.7.4",
     "posthtml-modules": "^0.9.0",
+    "sass": "^1.55.0",
     "sirv": "^2.0.2",
     "stylefmt": "^6.0.3",
     "ws": "^8.10.0"

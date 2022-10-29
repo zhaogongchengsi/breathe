@@ -1,8 +1,9 @@
-.a {
+@import "./index.scss";
+
+.a1 {
   font-size: 10px;
 
-  .b {
+  .b2 {
     font-weight: 500;
-    @include a;
   }
 }
