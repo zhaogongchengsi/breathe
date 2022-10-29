@@ -4,7 +4,7 @@ import type {
   NextHandler,
 } from "..";
 import { BreatheConfig } from "../../config";
-import { requestType } from "../../utils";
+import { requestType, formatErr } from "../../utils";
 import {
   readCodeFile,
   findFile,
@@ -66,7 +66,7 @@ export function pagesServeMiddleware(root: string, config: BreatheConfig) {
     } catch (err: any) {
       res.err = {
         code: 500,
-        massage: err.toString(),
+        massage: formatErr(err),
       };
       next();
     }
