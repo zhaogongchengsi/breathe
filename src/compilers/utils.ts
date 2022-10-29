@@ -33,6 +33,12 @@ export function findFile(
 ): string | undefined {
   const { ext, defaultFile } = Object.assign({}, options);
 
+  if (filepath.startsWith("/")) {
+    filepath = filepath.substring(1);
+  }
+
+  let { dir, name, ext: ex } = parse(filepath);
+
   const url = resolve(basepath, filepath);
 
   const stat = statSync(url);
@@ -40,8 +46,6 @@ export function findFile(
   if (stat.isFile()) {
     return url;
   }
-
-  let { dir, name, ext: ex } = parse(filepath);
 
   const getExt = () => {
     return ext ? ext : ex || "";

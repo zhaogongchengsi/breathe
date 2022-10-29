@@ -1,4 +1,4 @@
-import posthtml from "posthtml";
+import posthtml, { Plugin } from "posthtml";
 import { parse, resolve } from "path";
 // @ts-ignore
 import posthtmlModule from "posthtml-modules";
@@ -15,14 +15,19 @@ export interface CompilerHtmlOptions {
   root?: string;
   modules?: string;
   mode?: Mode;
+  plugins?: Plugin<any>[];
 }
 
-export function compilerHtml(html: string, options?: CompilerHtmlOptions) {
-  const { root, mode, modules } = Object.assign(
+export function compilerHtml(
+  html: string,
+  options?: CompilerHtmlOptions
+): Promise<string> {
+  const { root, mode, modules, plugins } = Object.assign(
     {
       root: process.cwd(),
       modules: "modules",
       mode: "production",
+      plugins: [],
     },
     options
   );
@@ -32,18 +37,14 @@ export function compilerHtml(html: string, options?: CompilerHtmlOptions) {
     root: root,
   });
 
-  const stylePlugin = posthtmlStylePlugin({
-    mode: mode,
-  });
-
   const htmlModulesMidd = posthtmlModule({
     root: root,
     from: resolve(root, modules),
-    plugins: () => [stylePlugin],
+    plugins: () => plugins,
   });
 
   return new Promise((res, rej) => {
-    posthtml([includePlugin])
+    posthtml([includePlugin, ...plugins])
       .use(htmlModulesMidd)
       .process(html)
       .then((result) => {

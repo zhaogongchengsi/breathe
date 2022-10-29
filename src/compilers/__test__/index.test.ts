@@ -11,6 +11,7 @@ import {
   compilerSassStyle,
   compilerSassFile,
   compilerHtml,
+  posthtmlStylePlugin,
 } from "../";
 
 describe("script", () => {
@@ -86,13 +87,29 @@ describe("find file", () => {
     expect(filepath).toBe(targetFile);
   });
 
-  it("defaule index file", () => {
+  it("url", () => {
+    const filepath = findFile(__dirname, "/htmltest/pages", {
+      defaultFile: "index",
+      ext: ".html",
+    });
+
+    expect(filepath).toBe(targetFile);
+  });
+
+  it("file suffix", () => {
     const filepath = findFile(__dirname, "htmltest/pages/index.html");
+    expect(filepath).toBe(targetFile);
+  });
+
+  it.todo("file no suffix", () => {
+    const filepath = findFile(__dirname, "htmltest/pages/index", {
+      ext: ".html",
+    });
     expect(filepath).toBe(targetFile);
   });
 });
 
-describe("Integration default index.html", () => {
+describe.todo("Integration default index.html", () => {
   it(" read default index.html", async () => {
     const filepath = findFile(__dirname, "htmltest/pages", {
       defaultFile: "index",
@@ -122,5 +139,37 @@ describe("Integration default index.html", () => {
     });
 
     expect(str).not.toBe("");
+  });
+});
+
+describe("style loder", () => {
+  it("style dev", async () => {
+    const html = `<head>
+            <link rel="stylesheet" href="index.scss">
+    </head>`;
+
+    const str = await compilerHtml(html!, {
+      modules: "layout",
+      root: join(__dirname, "htmltest"),
+      mode: "development",
+      plugins: [posthtmlStylePlugin({ mode: "development" })],
+    });
+
+    expect(str).toContain("type=scss");
+  });
+
+  it("style pro", async () => {
+    const html = `<head>
+            <link rel="stylesheet" href="index.scss">
+    </head>`;
+
+    const str = await compilerHtml(html!, {
+      modules: "layout",
+      root: join(__dirname, "htmltest"),
+      mode: "production",
+      plugins: [posthtmlStylePlugin({ mode: "production" })],
+    });
+
+    expect(str).toContain("index.css");
   });
 });
