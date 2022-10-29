@@ -1,0 +1,8 @@
+.a {
+  font-size: 10px;
+
+  .b {
+    font-weight: 500;
+    @include a;
+  }
+}

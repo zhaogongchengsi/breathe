@@ -5,7 +5,6 @@ import type {
 } from "..";
 import { BreatheConfig } from "../../config";
 import { requestType } from "../../utils";
-import { compilerSass } from "../../style-compiler";
 
 export function styleServeMiddleware(root: string, config: BreatheConfig) {
   return async (

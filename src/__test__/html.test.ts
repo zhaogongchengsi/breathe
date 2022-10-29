@@ -9,6 +9,7 @@ describe("html", () => {
     layouts: "layout",
     components: "components",
     root,
+    mode: "development",
   };
 
   const html = new Html(config);
