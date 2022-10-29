@@ -6,6 +6,8 @@ export interface PostHtmlStylePluginOptons {
 }
 
 export function posthtmlStylePlugin(options: PostHtmlStylePluginOptons) {
+  const isDev = options.mode === "development";
+
   return (tree: PostHTML.Node) => {
     // @ts-ignore
     tree.match({ tag: "link", attrs: { rel: "stylesheet" } }, (node) => {
@@ -14,11 +16,11 @@ export function posthtmlStylePlugin(options: PostHtmlStylePluginOptons) {
       if (!attrs.href) {
         return node;
       }
-      const isDev = options.mode === "development";
+
       // @ts-ignore
       const { ext, name, dir, root } = parse(attrs.href);
       const type = ext.replace(".", "");
-      
+
       const url = [root, dir, `${name}.css`, isDev ? `?type=${type}` : ""]
         .filter(Boolean)
         .join("/");
@@ -30,5 +32,8 @@ export function posthtmlStylePlugin(options: PostHtmlStylePluginOptons) {
         },
       });
     });
+
+    
+
   };
 }

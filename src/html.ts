@@ -5,8 +5,6 @@ import { join, parse, resolve } from "path";
 import posthtmlModule from "posthtml-modules";
 // @ts-ignore
 import posthtmlInclude from "posthtml-include";
-// @ts-ignore
-import postcss from "posthtml-postcss";
 
 import { posthtmlStylePlugin } from "./posthtml-plugins";
 
