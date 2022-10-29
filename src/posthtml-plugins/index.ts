@@ -1,1 +1,0 @@
-export { posthtmlStylePlugin } from './style'

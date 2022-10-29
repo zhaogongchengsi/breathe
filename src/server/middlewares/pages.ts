@@ -5,7 +5,12 @@ import type {
 } from "..";
 import { BreatheConfig } from "../../config";
 import { requestType } from "../../utils";
-import { readCodeFile, findFile, compilerHtml } from "../../compilers";
+import {
+  readCodeFile,
+  findFile,
+  compilerHtml,
+  posthtmlStylePlugin,
+} from "../../compilers";
 import { join } from "path";
 
 export function pagesServeMiddleware(root: string, config: BreatheConfig) {
@@ -19,7 +24,7 @@ export function pagesServeMiddleware(root: string, config: BreatheConfig) {
       return;
     }
 
-    const url = res.parse?.pathname;
+    let url = res.parse?.pathname;
 
     if (!url) {
       next();
@@ -31,31 +36,41 @@ export function pagesServeMiddleware(root: string, config: BreatheConfig) {
       return;
     }
 
-    const file = findFile(
-      join(root, config.pages),
-      url.endsWith(".html") ? url : url + ".html",
-      {
-        defaultFile: "index",
-        ext: ".html",
-      }
-    );
-
-    if (!file) {
-      next();
-      return;
+    if (url === "/") {
+      url = "index.html";
     }
 
+    let file: string | undefined = "";
+    let code = "";
+    let html = "";
     try {
-      const code = await readCodeFile(file);
-      const html = await compilerHtml(code, {
+      file = findFile(
+        join(root, config.pages),
+        url.endsWith(".html") ? url : url + ".html",
+        {
+          defaultFile: "index",
+          ext: ".html",
+        }
+      );
+      if (!file) {
+        next();
+        return;
+      }
+      code = await readCodeFile(file);
+      html = await compilerHtml(code, {
         root,
         modules: config.layouts,
         mode: "development",
+        plugins: [posthtmlStylePlugin({ mode: "development" })],
       });
-      res.end(html);
-    } catch (err) {
-      console.log(err);
+    } catch (err: any) {
+      res.err = {
+        code: 500,
+        massage: err.toString(),
+      };
       next();
     }
+
+    res.end(html);
   };
 }

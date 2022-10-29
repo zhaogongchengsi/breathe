@@ -1,5 +1,5 @@
 import postcss, { AcceptedPlugin } from "postcss";
-import sass, { compileAsync } from "sass";
+import sass, { compileAsync, compileString } from "sass";
 
 export function compilerStyle(
   css: string,
@@ -31,10 +31,14 @@ export function compilerSassStyle(code: string) {
   });
 }
 
+export function compilerSassStyleSync(code: string) {
+  return compileString(code).css;
+}
+
 export async function compilerSassFile(form: string, to?: string) {
   const res = await compileAsync(form);
   if (to) {
-    console.log("写入css")
+    console.log("写入css");
   }
   return res.css;
 }

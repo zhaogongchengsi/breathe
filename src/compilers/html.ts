@@ -6,7 +6,7 @@ import posthtmlModule from "posthtml-modules";
 import posthtmlInclude from "posthtml-include";
 import PostHTML from "posthtml";
 import { Mode } from ".";
-
+import { compileString } from "sass";
 export interface PostHtmlStylePluginOptons {
   mode: Mode;
 }
@@ -22,7 +22,7 @@ export function compilerHtml(
   html: string,
   options?: CompilerHtmlOptions
 ): Promise<string> {
-  const { root, mode, modules, plugins } = Object.assign(
+  const { root, modules, plugins } = Object.assign(
     {
       root: process.cwd(),
       modules: "modules",
@@ -81,6 +81,20 @@ export function posthtmlStylePlugin(options: PostHtmlStylePluginOptons) {
           ...attrs,
           href: url,
         },
+      });
+    });
+
+    tree.match({ tag: "style", attrs: { lang: "scss" } }, (node) => {
+      const { content, attrs } = node;
+
+      // @ts-ignore
+      delete attrs.lang;
+      // @ts-ignore
+      const scsscode: string = content[0] ?? "";
+
+      return Object.assign(node, {
+        content: compileString(scsscode).css,
+        attrs,
       });
     });
   };

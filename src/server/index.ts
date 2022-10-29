@@ -14,6 +14,7 @@ import {
   pagesServeMiddleware,
   urlParseMiddleware,
   styleServeMiddleware,
+  serverErrotMiddleware,
 } from "./middlewares";
 import compression from "compression";
 import { IncomingMessage, ServerResponse } from "http";
@@ -31,8 +32,14 @@ export interface ParseUrlInfo {
   _raw: string;
 }
 
+export interface ErrorInfo {
+  code: number;
+  massage: string;
+}
+
 export interface BreatheServerResponse extends ServerResponse<IncomingMessage> {
   html?: string;
+  err?: ErrorInfo;
   parse?: ParseUrlInfo;
 }
 
@@ -55,6 +62,7 @@ export async function createDevServer(root: string, option: Optopns) {
     staicServeMiddleware,
     pagesServeMiddleware,
     styleServeMiddleware,
+    serverErrotMiddleware,
   ];
 
   const app = polka({
