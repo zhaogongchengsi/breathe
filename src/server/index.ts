@@ -17,7 +17,6 @@ import {
 } from "./middlewares";
 import compression from "compression";
 import { IncomingMessage, ServerResponse } from "http";
-import { Html } from "../compilers/html";
 
 export interface Optopns extends ServerOption {
   configPath: string;
@@ -33,7 +32,7 @@ export interface ParseUrlInfo {
 }
 
 export interface BreatheServerResponse extends ServerResponse<IncomingMessage> {
-  html?: Html;
+  html?: string;
   parse?: ParseUrlInfo;
 }
 
