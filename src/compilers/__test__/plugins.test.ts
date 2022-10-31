@@ -46,8 +46,6 @@ describe("style loder", () => {
       plugins: [posthtmlStylePlugin({ mode: "development" })],
     });
 
-    console.log(str);
-
     expect(str).toContain(".a .b");
   });
 });

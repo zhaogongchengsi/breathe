@@ -1,7 +1,7 @@
 import { join } from "path";
 import { describe, expect, it } from "vitest";
 import { requestType } from "..";
-import { fileExist } from "../fs";
+import { fileExist, catalogScan } from "../fs";
 import { _require } from "../module";
 
 describe("fs", () => {
@@ -11,6 +11,17 @@ describe("fs", () => {
 
     expect(is1).toBe(true);
     expect(is2).toBe(false);
+  });
+
+  it("catalogScan", async () => {
+    const cacth = await catalogScan(__dirname, "pages");
+    const index = cacth.get("pages/index");
+    const index2 = cacth.get("pages/about/index");
+    const index3 = cacth.get("pages/about/desc/index");
+
+    expect(index).toContain("<h1>pages</h1>");
+    expect(index2).toContain("<h1>about page</h1>");
+    expect(index3).toContain("<h1>about desc</h1>");
   });
 });
 
