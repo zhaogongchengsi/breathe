@@ -99,3 +99,37 @@ export function posthtmlStylePlugin(options: PostHtmlStylePluginOptons) {
     });
   };
 }
+
+export interface posthtmlInjectionOptions {
+  mode: Mode;
+  code?: string;
+  Location: "header" | "footer";
+}
+
+export function posthtmlInjection(
+  mode: Mode,
+  ...options: posthtmlInjectionOptions[]
+) {
+  return (tree: PostHTML.Node) => {
+    options.forEach((option) => {
+      if (mode === option.mode) {
+        if (option.Location === "footer") {
+          tree.match({ tag: "body" }, (node) => {
+            return {
+              ...node,
+              content: node.content?.concat([option.code ?? ""]),
+            };
+          });
+        }
+        if (option.Location === "header") {
+          tree.match({ tag: "head" }, (node) => {
+            return {
+              ...node,
+              content: node.content?.concat([option.code ?? ""]),
+            };
+          });
+        }
+      }
+    });
+  };
+}

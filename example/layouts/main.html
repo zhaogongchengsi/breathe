@@ -5,14 +5,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="index.scss" />
-    <style lang="scss">
-      .a {
-        color: red;
-        .b {
-          font-size: 10px;
-        }
-      }
-    </style>
     <title>Document</title>
   </head>
   <body>
@@ -23,5 +15,52 @@
     <module href="nav.html">
       <div>131231soidhfgios pages 123 asdiuhasdu</div>
     </module>
+    <button id="wsClick">连接服务端</button>
+
+    <script>
+      (function () {
+        const protocol = location.protocol === "http:" ? "ws://" : "wss://";
+        const host = location.host;
+        const button = document.getElementById("wsClick");
+
+        button.addEventListener("click", () => {
+          const socket = new WebSocket(`${protocol}localhost:3031`);
+
+          // Listen for messages
+          socket.addEventListener("message", function (event) {
+            console.log("Message from server ", event.data);
+          });
+
+          socket.addEventListener("close", function (event) {
+            console.log("Message from server ", event.data);
+          });
+
+          socket.addEventListener("error", function (event) {
+            console.log("Message from server ", event.data);
+          });
+
+          socket.addEventListener("open", function (event) {
+            console.log("Message from server ", event);
+            heart(3000);
+          });
+
+          const send = (type, message) => {
+            socket.send(
+              JSON.stringify({
+                type,
+                message,
+              })
+            );
+          };
+
+          const heart = (time = 3000) => {
+            setInterval(() => {
+              console.log("ping")
+              send("heartbeat", "message");
+            }, time);
+          };
+        });
+      })();
+    </script>
   </body>
 </html>

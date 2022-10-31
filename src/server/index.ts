@@ -17,10 +17,12 @@ import {
   serverErrotMiddleware,
 } from "./middlewares";
 import compression from "compression";
-import { IncomingMessage, ServerResponse } from "http";
+import { IncomingMessage, ServerResponse, createServer } from "http";
 import chokidar from "chokidar";
-import { resolveWatchOptions } from "../watch";
-import { resolve } from "path";
+import { createWsServer } from "./ws";
+import { parse } from "url";
+
+export const WS_PATH = "ws";
 
 export interface Optopns extends ServerOption {
   configPath: string;
@@ -61,31 +63,25 @@ export async function createDevServer(root: string, option: Optopns) {
     port: option.port ?? server.port ?? DEFAULT_PORT,
   };
 
-  const middlewares = [
-    urlParseMiddleware,
-    staicServeMiddleware,
-    pagesServeMiddleware,
-    styleServeMiddleware,
-    serverErrotMiddleware,
-  ];
-
+  const httpServer = createServer();
+  const wsPort = port + 1;
+  const ws = createWsServer(wsPort, host);
   const app = polka({
     onNoMatch: (req, res) => {
       res.end(`<h1> Not Found  ${req.url}  </h1>`);
     },
+    server: httpServer,
   });
-
-  const serverMidds = middlewares.map((middleware) => {
-    return middleware(root, conf);
-  });
-
-  const watch = chokidar.watch(
-    resolve(root, conf.pages),
-    resolveWatchOptions()
-  );
 
   app
-    .use(compression(), ...serverMidds)
+    .use(
+      compression(),
+      staicServeMiddleware(root, conf),
+      urlParseMiddleware(root, conf),
+      pagesServeMiddleware(root, conf),
+      styleServeMiddleware(root, conf),
+      serverErrotMiddleware(root, conf)
+    )
 
     .get("*", async (req: BreatheServerRequest, res: BreatheServerResponse) => {
       //   const html = await res.html?.render();
@@ -94,6 +90,7 @@ export async function createDevServer(root: string, option: Optopns) {
 
     .listen(port, host, (err: any) => {
       if (err) throw err;
-      console.log(colors.green(`http://${host}:${port}`));
+      console.log(colors.green(`http -> http://${host}:${port}`));
+      console.log(colors.green(`ws -> ws://${host}:/${wsPort}`));
     });
 }
