@@ -1,7 +1,7 @@
 import { join } from "path";
 import { describe, expect, it } from "vitest";
 import { requestType } from "..";
-import { fileExist, catalogScan } from "../fs";
+import { fileExist, catalogScan, createFileChtch } from "../fs";
 import { _require } from "../module";
 
 describe("fs", () => {
@@ -28,6 +28,37 @@ describe("fs", () => {
     const cacth = await catalogScan(__dirname, "pages", "|");
     const index = cacth.get("pages|index");
     expect(index).toContain("<h1>pages</h1>");
+  });
+});
+
+describe("createFileChtch", async () => {
+  const cacth = await createFileChtch(__dirname, "pages");
+
+  it("find", () => {
+    const file = cacth.find("/index.html");
+    expect(file).toContain("<h1>pages</h1>");
+  });
+
+  it("update", async () => {
+    const file = cacth.find("/index.html");
+    await cacth.update("/index.html");
+    expect(file).toContain("<h1>pages</h1>");
+  });
+
+  it("update value", async () => {
+    await cacth.update("/index.html", "<h1> 123 </h1>");
+    expect(cacth.find("/index.html")).toContain("<h1> 123 </h1>");
+  });
+
+  it("add value", async () => {
+    await cacth.update("/index2.html", "<h1> 123 </h1>");
+    expect(cacth.find("/index2.html")).toContain("<h1> 123 </h1>");
+  });
+
+  it("delete", async () => {
+    cacth.deleteChtch("/index.html");
+    const value = cacth.find("/index.html");
+    expect(value).toBe(undefined);
   });
 });
 

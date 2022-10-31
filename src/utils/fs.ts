@@ -48,3 +48,56 @@ export async function catalogScan(
 
   return catchFile;
 }
+
+export async function createFileChtch(
+  root: string,
+  path: string,
+  splitSep: string = "/"
+) {
+  const chtch = await catalogScan(root, path, splitSep);
+
+  const key = (pathkey: string): string => {
+    const target = join(path, pathkey);
+    const { dir, name } = parse(target);
+    return [...dir.split(sep), name].join(splitSep);
+  };
+
+  return {
+    find(path: string) {
+      return chtch.get(key(path));
+    },
+    async update(pathkey: string, value?: string) {
+      if (value) {
+        chtch.set(key(pathkey), value || "");
+        return;
+      } else {
+        const filePath = resolve(root, join(path, pathkey));
+        const fileBuff = await readFile(filePath);
+        chtch.set(key(pathkey), fileBuff.toString());
+      }
+    },
+    deleteChtch(pathkey: string) {
+      chtch.delete(key(pathkey));
+    },
+    clearChtch() {
+      chtch.clear();
+    },
+
+    forEach(
+      cb: (
+        key: string,
+        value: string,
+        opt: { root: string; path: string; sep: string }
+      ) => void
+    ) {
+      chtch.forEach((key, value) => {
+        cb &&
+          cb(key, value, {
+            root,
+            path,
+            sep,
+          });
+      });
+    },
+  };
+}

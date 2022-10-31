@@ -1,4 +1,5 @@
 export { _require } from "./module";
-export { fileExist, catalogScan } from "./fs";
+export type { DirChtch } from "./fs";
+export { fileExist, catalogScan, createFileChtch } from "./fs";
 export { requestType } from "./request";
-export { formatErr } from './format'
+export { formatErr } from "./format";

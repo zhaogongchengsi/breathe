@@ -4,16 +4,19 @@ import type {
   NextHandler,
 } from "..";
 import { BreatheConfig } from "../../config";
-import { requestType, formatErr } from "../../utils";
+import { requestType, formatErr, DirChtch } from "../../utils";
 import {
   readCodeFile,
   findFile,
   compilerHtml,
   posthtmlStylePlugin,
 } from "../../compilers";
-import { join } from "path";
 
-export function pagesServeMiddleware(root: string, config: BreatheConfig) {
+export function pagesServeMiddleware(
+  root: string,
+  { pages }: BreatheConfig,
+  dirChtch: DirChtch
+) {
   return async (
     req: BreatheServerRequest,
     res: BreatheServerResponse,
@@ -40,29 +43,26 @@ export function pagesServeMiddleware(root: string, config: BreatheConfig) {
       url = "index.html";
     }
 
-    let file: string | undefined = "";
-    let code = "";
     let html = "";
+
+    console.log(url);
+
     try {
-      file = findFile(
-        join(root, config.pages),
-        url.endsWith(".html") ? url : url + ".html",
-        {
-          defaultFile: "index",
-          ext: ".html",
-        }
-      );
-      if (!file) {
+      const code = dirChtch.get(url);
+
+      if (code) {
         next();
         return;
       }
-      code = await readCodeFile(file);
-      html = await compilerHtml(code, {
-        root,
-        modules: config.layouts,
-        mode: "development",
-        plugins: [posthtmlStylePlugin({ mode: "development" })],
-      });
+
+      // html = await compilerHtml(code!, {
+      //   root,
+      //   modules: config.layouts,
+      //   mode: "development",
+      //   plugins: [posthtmlStylePlugin({ mode: "development" })],
+      // });
+
+      res.end(`<h1>${url}<h1>`);
     } catch (err: any) {
       res.err = {
         code: 500,
@@ -70,7 +70,5 @@ export function pagesServeMiddleware(root: string, config: BreatheConfig) {
       };
       next();
     }
-
-    res.end(html);
   };
 }

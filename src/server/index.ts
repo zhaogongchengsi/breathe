@@ -6,7 +6,7 @@ import {
   DEFAULT_HOST,
   resolveConfig,
 } from "../config";
-
+import chokidar from "chokidar";
 import polka from "polka";
 import colors from "picocolors";
 import {
@@ -17,10 +17,11 @@ import {
   serverErrotMiddleware,
 } from "./middlewares";
 import compression from "compression";
-import { IncomingMessage, ServerResponse, createServer } from "http";
-import chokidar from "chokidar";
+import { IncomingMessage, ServerResponse } from "http";
+import { catalogScan } from "../utils";
+
 import { createWsServer } from "./ws";
-import { parse } from "url";
+import { createWatcher } from "../watch";
 
 export const WS_PATH = "ws";
 
@@ -63,14 +64,31 @@ export async function createDevServer(root: string, option: Optopns) {
     port: option.port ?? server.port ?? DEFAULT_PORT,
   };
 
-  const httpServer = createServer();
   const wsPort = port + 1;
-  const ws = createWsServer(wsPort, host);
+
+  const fileCatch = await catalogScan(root, conf.pages, "/");
+
+  createWatcher(conf.pages, {
+    cwd: root,
+    sep: "/",
+    onChange(path) {
+      console.log(path);
+    },
+    onAdd(type, path) {
+      console.log(type, path);
+    },
+  });
+
+  createWsServer(wsPort, host, {
+    onHeartbeat(message) {
+      console.log(message);
+    },
+  });
+
   const app = polka({
     onNoMatch: (req, res) => {
       res.end(`<h1> Not Found  ${req.url}  </h1>`);
     },
-    server: httpServer,
   });
 
   app
@@ -78,7 +96,7 @@ export async function createDevServer(root: string, option: Optopns) {
       compression(),
       staicServeMiddleware(root, conf),
       urlParseMiddleware(root, conf),
-      pagesServeMiddleware(root, conf),
+      pagesServeMiddleware(root, conf, fileCatch),
       styleServeMiddleware(root, conf),
       serverErrotMiddleware(root, conf)
     )
@@ -88,7 +106,7 @@ export async function createDevServer(root: string, option: Optopns) {
       res.end("<h1> defaule hello world </h1>");
     })
 
-    .listen(port, host, (err: any) => {
+    .listen(port, (err: any) => {
       if (err) throw err;
       console.log(colors.green(`http -> http://${host}:${port}`));
       console.log(colors.green(`ws -> ws://${host}:/${wsPort}`));
