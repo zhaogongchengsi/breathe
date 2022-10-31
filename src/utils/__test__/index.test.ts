@@ -23,6 +23,12 @@ describe("fs", () => {
     expect(index2).toContain("<h1>about page</h1>");
     expect(index3).toContain("<h1>about desc</h1>");
   });
+
+  it("catalogScan (sep)", async () => {
+    const cacth = await catalogScan(__dirname, "pages", "|");
+    const index = cacth.get("pages|index");
+    expect(index).toContain("<h1>pages</h1>");
+  });
 });
 
 describe("module", () => {

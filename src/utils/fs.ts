@@ -1,4 +1,4 @@
-import { stat, statSync } from "fs";
+import { statSync } from "fs";
 import { readdir, readFile } from "fs/promises";
 import { join, parse, resolve, sep } from "path";
 
@@ -17,12 +17,13 @@ export function fileExist(path: string): boolean {
   }
 }
 
+export type DirChtch = Map<string, string>;
 export async function catalogScan(
   root: string,
   path: string,
   splitSep: string = "/"
-) {
-  const catchFile = new Map<string, string>();
+): Promise<DirChtch> {
+  const catchFile: DirChtch = new Map<string, string>();
   const targetDir = resolve(root, path);
 
   const files = await readdir(targetDir);

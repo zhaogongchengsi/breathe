@@ -18,6 +18,9 @@ import {
 } from "./middlewares";
 import compression from "compression";
 import { IncomingMessage, ServerResponse } from "http";
+import chokidar from "chokidar";
+import { resolveWatchOptions } from "../watch";
+import { resolve } from "path";
 
 export interface Optopns extends ServerOption {
   configPath: string;
@@ -75,6 +78,11 @@ export async function createDevServer(root: string, option: Optopns) {
   const serverMidds = middlewares.map((middleware) => {
     return middleware(root, conf);
   });
+
+  const watch = chokidar.watch(
+    resolve(root, conf.pages),
+    resolveWatchOptions()
+  );
 
   app
     .use(compression(), ...serverMidds)
