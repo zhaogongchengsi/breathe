@@ -6,7 +6,6 @@ import {
   DEFAULT_HOST,
   resolveConfig,
 } from "../config";
-import chokidar from "chokidar";
 import polka from "polka";
 import colors from "picocolors";
 import {
