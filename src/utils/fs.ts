@@ -49,7 +49,23 @@ export async function catalogScan(
   return catchFile;
 }
 
-export type CreateFileChtch = ReturnType<typeof createFileChtch>;
+export type CreateFileChtch = {
+  find(path: string): string | undefined;
+  update(pathkey: string, value?: string | undefined): Promise<void>;
+  deleteChtch(pathkey: string): void;
+  clearChtch(): void;
+  forEach(
+    cb: (
+      key: string,
+      value: string,
+      opt: {
+        root: string;
+        path: string;
+        sep: string;
+      }
+    ) => void
+  ): void;
+};
 
 export async function createFileChtch(
   root: string,

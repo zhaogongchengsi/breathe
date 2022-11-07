@@ -4,7 +4,7 @@ import type {
   NextHandler,
 } from "..";
 import { BreatheConfig } from "../../config";
-import { requestType, formatErr, DirChtch } from "../../utils";
+import { requestType, formatErr, DirChtch, CreateFileChtch } from "../../utils";
 import {
   readCodeFile,
   findFile,
@@ -14,8 +14,8 @@ import {
 
 export function pagesServeMiddleware(
   root: string,
-  { pages }: BreatheConfig,
-  dirChtch: DirChtch
+  { pages, layouts }: BreatheConfig,
+  dirChtch: CreateFileChtch
 ) {
   return async (
     req: BreatheServerRequest,
@@ -45,24 +45,20 @@ export function pagesServeMiddleware(
 
     let html = "";
 
-    console.log(url);
-
     try {
-      const code = dirChtch.get(url);
+      const code = dirChtch.find(url);
 
-      if (code) {
+      if (!code) {
         next();
         return;
       }
 
-      // html = await compilerHtml(code!, {
-      //   root,
-      //   modules: config.layouts,
-      //   mode: "development",
-      //   plugins: [posthtmlStylePlugin({ mode: "development" })],
-      // });
-
-      res.end(`<h1>${url}<h1>`);
+      html = await compilerHtml(code, {
+        root,
+        modules: layouts,
+        mode: "development",
+        plugins: [posthtmlStylePlugin({ mode: "development" })],
+      });
     } catch (err: any) {
       res.err = {
         code: 500,
@@ -70,5 +66,7 @@ export function pagesServeMiddleware(
       };
       next();
     }
+
+    res.end(html || `<h1>${url}<h1>`);
   };
 }

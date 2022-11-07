@@ -17,10 +17,12 @@ import {
 } from "./middlewares";
 import compression from "compression";
 import { IncomingMessage, ServerResponse } from "http";
-import { catalogScan } from "../utils";
+import { catalogScan, createFileChtch } from "../utils";
 
 import { createWsServer } from "./ws";
 import { createWatcher } from "../watch";
+import { join } from "path";
+import { readFile } from "fs/promises";
 
 export const WS_PATH = "ws";
 
@@ -65,16 +67,35 @@ export async function createDevServer(root: string, option: Optopns) {
 
   const wsPort = port + 1;
 
-  const fileCatch = await catalogScan(root, conf.pages, "/");
+  const fileCatch = await createFileChtch(root, conf.pages, "/");
+
+  const getKey = (path: string) => {
+    return path.replace(conf.pages, "");
+  };
+
+  const changeHandler = async (path: string) => {
+    const filePath = join(root, path);
+    const code = await readFile(filePath, { encoding: "utf8" });
+    fileCatch.update(getKey(path), code);
+  };
 
   createWatcher(conf.pages, {
     cwd: root,
     sep: "/",
-    onChange(path) {
-      console.log(path);
+    async onChange(path) {
+      changeHandler(path);
     },
-    onAdd(type, path) {
-      console.log(type, path);
+    async onAdd(type, path) {
+      if (type === "dir") {
+        return;
+      }
+      changeHandler(path);
+    },
+    async onDelete(type, path) {
+      if (type === "dir") {
+        return;
+      }
+      fileCatch.deleteChtch(getKey(path));
     },
   });
 
