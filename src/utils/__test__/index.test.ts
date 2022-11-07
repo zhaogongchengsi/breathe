@@ -37,6 +37,9 @@ describe("createFileChtch", async () => {
   it("find", () => {
     const file = cacth.find("/index.html");
     expect(file).toContain("<h1>pages</h1>");
+
+    const file2 = cacth.find("/index");
+    expect(file2).toContain("<h1>pages</h1>");
   });
 
   it("update", async () => {

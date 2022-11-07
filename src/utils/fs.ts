@@ -49,6 +49,8 @@ export async function catalogScan(
   return catchFile;
 }
 
+export type CreateFileChtch = ReturnType<typeof createFileChtch>;
+
 export async function createFileChtch(
   root: string,
   path: string,
