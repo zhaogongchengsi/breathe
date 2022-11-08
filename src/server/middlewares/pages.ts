@@ -7,13 +7,16 @@ import { BreatheConfig } from "../../config";
 import { requestType, formatErr, CreateFileChtch } from "../../utils";
 import {
   compilerHtml,
+  posthtmlInjection,
   posthtmlStylePlugin,
 } from "../../compilers";
+import { injectClientCode } from "../ws";
 
 export function pagesServeMiddleware(
   root: string,
   { pages, layouts }: BreatheConfig,
-  dirChtch: CreateFileChtch
+  dirChtch: CreateFileChtch,
+  { port }: { port: number }
 ) {
   return async (
     req: BreatheServerRequest,
@@ -55,7 +58,14 @@ export function pagesServeMiddleware(
         root,
         modules: layouts,
         mode: "development",
-        plugins: [posthtmlStylePlugin({ mode: "development" })],
+        plugins: [
+          posthtmlStylePlugin({ mode: "development" }),
+          posthtmlInjection("development", {
+            mode: "development",
+            code: injectClientCode({ port: port }),
+            Location: "footer",
+          }),
+        ],
       });
     } catch (err: any) {
       res.err = {

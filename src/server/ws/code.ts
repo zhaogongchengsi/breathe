@@ -15,38 +15,28 @@ export function injectClientCode({
 }: ClientOption) {
   return `<script>;
   (function () {
-        const socket = new WebSocket('ws://${host}:${port}');  
-        // Listen for messages
-        socket.addEventListener('message', function (event) {
-            console.log('Message from server ', event.data);
-        });
+        const { protocol, host, pathname } = location;
+        const url = (protocol === "http:" ? "ws://" : "wss://") + "${host}:"+${port}
 
-        socket.addEventListener('close', function (event) {
-            console.log('Message from server ', event.data);
-        });
+        function connect() {
+          const socket = new WebSocket(url);
+          socket.addEventListener("message", function (event) {
+            const data = JSON.parse(event.data);
+            if (data.type === "fileChange") {
+              const fileUrl = data.message.replace(".html", "");
+              const url = pathname.replace("/", "").replace(".html", "");
+              const path = url === "" ? "index" : url;
+              if (fileUrl === path) {
+                location.reload();
+              }
+            }
+          });
 
-        socket.addEventListener('error', function (event) {
-            console.log('Message from server ', event.data);
-        });
-
-        socket.addEventListener('open', function (event) {
-            console.log('Message from server ', event.data);
-            heart()
-        });
-
-        function send  () => {
+          socket.addEventListener("open", function (event) {heart(${heartRate})});
+          const send = (type, message) => {socket.send(JSON.stringify({type,message}))};
+          const heart = (time = 3000) => {setInterval(() => {send("${heartName}", "${heartName}");}, time);};
         }
-
-        const heart = (time) => {
-            setInterval(() => {
-                ws.send({
-                    type: "heartbeat",
-                    messate: "heartName"
-                })
-            }, time);
-        };
-
-    }
-  )();</script>
+        connect()
+     })();</script>
     `;
 }

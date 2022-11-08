@@ -87,8 +87,7 @@ export async function createDevServer(root: string, option: Optopns) {
     const filePath = join(root, path);
     const code = await readFile(filePath, { encoding: "utf8" });
     fileCatch.update(getKey(path), code);
-    broadcast({ type: "fileChange", message: rec.values() });
-    rec.clear();
+    broadcast({ type: "fileChange", message: getKey(path).replace(sep, "/") });
   };
 
   createWatcher(conf.pages, {
@@ -120,7 +119,7 @@ export async function createDevServer(root: string, option: Optopns) {
       compression(),
       staicServeMiddleware(root, conf),
       urlParseMiddleware(root, conf),
-      pagesServeMiddleware(root, conf, fileCatch),
+      pagesServeMiddleware(root, conf, fileCatch, { port: wsPort }),
       styleServeMiddleware(root, conf),
       serverErrotMiddleware(root, conf)
     )
