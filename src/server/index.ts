@@ -22,7 +22,7 @@ import {
   urlParseMiddleware,
 } from "./middlewares";
 
-import { createWsServer } from "./ws";
+import { createWsServer, WsMessage } from "./ws";
 
 export const WS_PATH = "ws";
 
@@ -71,6 +71,14 @@ export async function createDevServer(root: string, option: Optopns) {
 
   const fileCatch = await createFileChtch(root, conf.pages, "/");
 
+  const wss = createWsServer(wsPort, host);
+
+  const broadcast = (message: WsMessage) => {
+    wss.clients.forEach((ws) => {
+      ws.send(JSON.stringify(message));
+    });
+  };
+
   const getKey = (path: string) => {
     return path.replace(new RegExp(`^${conf.pages}\\${sep}`), "");
   };
@@ -79,20 +87,9 @@ export async function createDevServer(root: string, option: Optopns) {
     const filePath = join(root, path);
     const code = await readFile(filePath, { encoding: "utf8" });
     fileCatch.update(getKey(path), code);
+    broadcast({ type: "fileChange", message: rec.values() });
+    rec.clear();
   };
-
-  createWsServer(wsPort, host, {
-    onHeartbeat(send) {
-      if (!rec.isChange) {
-        return;
-      }
-      send({
-        type: "fileChange",
-        message: rec.values(),
-      });
-      rec.clear();
-    },
-  });
 
   createWatcher(conf.pages, {
     cwd: root,
@@ -107,8 +104,8 @@ export async function createDevServer(root: string, option: Optopns) {
     },
     async onDelete(type, path) {
       if (type === "dir") return;
-      rec.change(getKey(path), "delete");
       fileCatch.deleteChtch(getKey(path));
+      rec.change(getKey(path), "delete");
     },
   });
 

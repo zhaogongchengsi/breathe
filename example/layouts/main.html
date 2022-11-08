@@ -36,6 +36,7 @@
           // Listen for messages
           socket.addEventListener("message", function (event) {
             const data = JSON.parse(event.data);
+            console.log(data)
             if (data.type === "fileChange") {
               console.log("文件更新");
               console.log(data.message);
