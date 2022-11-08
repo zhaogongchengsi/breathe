@@ -13,22 +13,33 @@
       <content></content>
     </main>
     <module href="nav.html">
-      <div>131231soidhfgios pages 123 asdiuhasdu</div>
+      <div>131231soidhfgios pages 123 1231</div>
     </module>
     <button id="wsClick">连接服务端</button>
 
     <script>
       (function () {
-        const protocol = location.protocol === "http:" ? "ws://" : "wss://";
-        const host = location.host;
         const button = document.getElementById("wsClick");
 
+        const { protocol, host, pathname } = location;
+        const path = pathname.replace(".html", "");
+
+        const url = `${
+          protocol === "http:" ? "ws://" : "wss://"
+        }localhost:3031${path}`;
+
+        console.log(url);
+
         button.addEventListener("click", () => {
-          const socket = new WebSocket(`${protocol}localhost:3031`);
+          const socket = new WebSocket(url);
 
           // Listen for messages
           socket.addEventListener("message", function (event) {
-            console.log("Message from server ", event.data);
+            const data = JSON.parse(event.data);
+            if (data.type === "fileChange") {
+              console.log("文件更新");
+              console.log(data.message);
+            }
           });
 
           socket.addEventListener("close", function (event) {
@@ -36,7 +47,7 @@
           });
 
           socket.addEventListener("error", function (event) {
-            console.log("Message from server ", event.data);
+            console.log(event);
           });
 
           socket.addEventListener("open", function (event) {
@@ -55,7 +66,6 @@
 
           const heart = (time = 3000) => {
             setInterval(() => {
-              console.log("ping")
               send("heartbeat", "message");
             }, time);
           };

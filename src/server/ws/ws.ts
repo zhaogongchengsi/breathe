@@ -28,7 +28,9 @@ export function createWsServer(
       const message = JSON.parse(data.toString());
 
       const send = (msg: WsMessage) => {
-        ws.send(JSON.stringify(msg));
+        wss.clients.forEach((client) => {
+          client.send(JSON.stringify(msg));
+        });
       };
 
       if (message.type === "heartbeat") {

@@ -4,10 +4,8 @@ import type {
   NextHandler,
 } from "..";
 import { BreatheConfig } from "../../config";
-import { requestType, formatErr, DirChtch, CreateFileChtch } from "../../utils";
+import { requestType, formatErr, CreateFileChtch } from "../../utils";
 import {
-  readCodeFile,
-  findFile,
   compilerHtml,
   posthtmlStylePlugin,
 } from "../../compilers";

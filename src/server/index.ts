@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import { join } from "path";
+import { join, sep } from "path";
 import { readFile } from "fs/promises";
 import polka from "polka";
 import colors from "picocolors";
@@ -72,7 +72,7 @@ export async function createDevServer(root: string, option: Optopns) {
   const fileCatch = await createFileChtch(root, conf.pages, "/");
 
   const getKey = (path: string) => {
-    return path.replace(conf.pages, "");
+    return path.replace(new RegExp(`^${conf.pages}\\${sep}`), "");
   };
 
   const changeHandler = async (path: string) => {
@@ -99,7 +99,7 @@ export async function createDevServer(root: string, option: Optopns) {
     sep: "/",
     async onChange(path) {
       changeHandler(path);
-      rec.change(path, "update");
+      rec.change(getKey(path), "update");
     },
     async onAdd(type, path) {
       if (type === "dir") return;
@@ -107,7 +107,7 @@ export async function createDevServer(root: string, option: Optopns) {
     },
     async onDelete(type, path) {
       if (type === "dir") return;
-      rec.change(path, "delete");
+      rec.change(getKey(path), "delete");
       fileCatch.deleteChtch(getKey(path));
     },
   });
