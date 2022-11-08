@@ -21,6 +21,7 @@ export type DirChtch = Map<string, string>;
 export async function catalogScan(
   root: string,
   path: string,
+  cb?: (path: string, value: string) => void | Promise<void>,
   splitSep: string = "/"
 ): Promise<DirChtch> {
   const catchFile: DirChtch = new Map<string, string>();
@@ -34,14 +35,16 @@ export async function catalogScan(
     const chiFile = statSync(base);
 
     if (chiFile.isFile()) {
-      const file = await readFile(base);
+      const fileBuff = await readFile(base);
       const { dir, name } = parse(target);
       const key = [...dir.split(sep), name].join(splitSep);
-      catchFile.set(key, file.toString());
+      const fileStr = fileBuff.toString();
+      cb && (await cb(base, fileStr), fileStr);
+      catchFile.set(key, fileStr);
     }
 
     if (chiFile.isDirectory()) {
-      const fileCache = await catalogScan(root, target, splitSep);
+      const fileCache = await catalogScan(root, target, cb, splitSep);
       fileCache.forEach((value, key) => catchFile.set(key, value));
     }
   }
@@ -72,7 +75,7 @@ export async function createFileChtch(
   path: string,
   splitSep: string = "/"
 ) {
-  const chtch = await catalogScan(root, path, splitSep);
+  const chtch = await catalogScan(root, path, undefined, splitSep);
 
   const key = (pathkey: string): string => {
     const target = join(path, pathkey);

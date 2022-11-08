@@ -25,7 +25,7 @@ describe("fs", () => {
   });
 
   it("catalogScan (sep)", async () => {
-    const cacth = await catalogScan(__dirname, "pages", "|");
+    const cacth = await catalogScan(__dirname, "pages", undefined, "|");
     const index = cacth.get("pages|index");
     expect(index).toContain("<h1>pages</h1>");
   });
