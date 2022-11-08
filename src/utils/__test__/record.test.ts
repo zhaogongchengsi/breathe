@@ -45,4 +45,17 @@ describe("record", () => {
     rec.clear();
     expect(rec.values()).toEqual({});
   });
+
+  it("toString", () => {
+    const rec = new RecordInfo();
+    rec.change("/index", "add");
+    rec.change("/index", "update");
+    rec.change("/home", "delete");
+
+    expect(rec.toString()).toMatchInlineSnapshot(`
+      "/index file change x2
+      Delete /home file"
+    `);
+
+  });
 });

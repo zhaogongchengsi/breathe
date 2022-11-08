@@ -9,7 +9,27 @@ export default class RecordInfo {
   private infos = new Map<string, UpdtaeInfo>();
   constructor() {}
 
-  toString() {}
+  toString() {
+    const { infos } = this;
+    const strs: string[] = [];
+    infos.forEach((value, key) => {
+      switch (value.type) {
+        case "add": {
+          strs.push(`Newly added file -> ${key}`);
+          break;
+        }
+        case "delete": {
+          strs.push(`Delete ${key} file`);
+          break;
+        }
+        case "update": {
+          strs.push(`${key} file change x${value.quantity}`);
+        }
+      }
+    });
+
+    return strs.join("\n");
+  }
 
   clear() {
     this.infos.clear();
@@ -23,6 +43,7 @@ export default class RecordInfo {
       infos.set(path, {
         ...info,
         quantity: info.quantity! + 1,
+        type,
       });
       return;
     }
