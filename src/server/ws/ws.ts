@@ -1,7 +1,6 @@
-import { UpdateBundleProject } from "typescript";
 import WebSocket, { WebSocketServer } from "ws";
 
-export type WsMessageType = "heartbeat" | "message";
+export type WsMessageType = "heartbeat" | "message" | "fileChange";
 
 export interface WsMessage {
   type: WsMessageType;
@@ -9,7 +8,7 @@ export interface WsMessage {
 }
 
 export interface WsEventHandlers {
-  onHeartbeat?: (send: (type: WsMessageType, message: any) => void) => void;
+  onHeartbeat?: (send: (msg: WsMessage) => void) => void;
   onMessage?: (message: WsMessage) => WsMessage | undefined;
 }
 
@@ -28,27 +27,25 @@ export function createWsServer(
     ws.on("message", function message(data) {
       const message = JSON.parse(data.toString());
 
-      const send = (type: WsMessageType, message: any) => {
-        ws.send(
-          JSON.stringify({
-            type,
-            message,
-          })
-        );
+      const send = (msg: WsMessage) => {
+        ws.send(JSON.stringify(msg));
       };
 
       if (message.type === "heartbeat") {
         if (events) {
           events.onHeartbeat && events.onHeartbeat(send);
         }
-        send("heartbeat", "pong");
+        send({
+          type: "heartbeat",
+          message: "pong",
+        });
         return;
       }
 
       if (events && events.onMessage) {
         const msg = events.onMessage(message);
         if (msg) {
-          ws.send(JSON.stringify(msg));
+          send(msg);
         }
       }
     });

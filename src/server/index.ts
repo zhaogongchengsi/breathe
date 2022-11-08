@@ -82,12 +82,14 @@ export async function createDevServer(root: string, option: Optopns) {
   };
 
   createWsServer(wsPort, host, {
-    onHeartbeat() {
+    onHeartbeat(send) {
       if (!rec.isChange) {
         return;
       }
-
-      console.log(rec.toString());
+      send({
+        type: "fileChange",
+        message: rec.values(),
+      });
       rec.clear();
     },
   });
