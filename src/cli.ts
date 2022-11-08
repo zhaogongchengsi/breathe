@@ -11,6 +11,7 @@ export interface ServerOption {
 
 export interface BuildOption {
   outdir?: string;
+  configPath?: string;
 }
 
 export function createCli() {
@@ -33,9 +34,12 @@ export function createCli() {
 
   cli
     .command("build [root]", "build")
-    .option("--outDir <dir>", `[string] output directory (default: dist)`)
+    .option("--outdir <dir>", `[string] output directory (default: dist)`)
     .action((root: string, option: BuildOption) => {
-      build();
+      build(cwdPath, {
+        outdir: option.outdir,
+        configPath: root,
+      });
     });
   return cli;
 }

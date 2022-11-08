@@ -101,21 +101,21 @@ export async function createFileChtch(
       chtch.clear();
     },
 
-    forEach(
+    async forEach(
       cb: (
         key: string,
         value: string,
         opt: { root: string; path: string; sep: string }
-      ) => void
+      ) => void | Promise<void>
     ) {
-      chtch.forEach((key, value) => {
+      for await (const [key, value] of chtch) {
         cb &&
-          cb(key, value, {
+          (await cb(key, value, {
             root,
             path,
             sep,
-          });
-      });
+          }));
+      }
     },
   };
 }
