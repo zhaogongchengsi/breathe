@@ -64,4 +64,16 @@ export default class RecordInfo {
 
     return obj;
   }
+
+  get isChange() {
+    if (this.infos.size > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  set inChange(_: any) {
+    throw new Error(`isChange is a read-only property`);
+  }
 }

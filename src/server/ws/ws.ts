@@ -9,7 +9,7 @@ export interface WsMessage {
 }
 
 export interface WsEventHandlers {
-  onHeartbeat?: (message: string) => void;
+  onHeartbeat?: (send: (type: WsMessageType, message: any) => void) => void;
   onMessage?: (message: WsMessage) => WsMessage | undefined;
 }
 
@@ -28,16 +28,20 @@ export function createWsServer(
     ws.on("message", function message(data) {
       const message = JSON.parse(data.toString());
 
-      if (message.type === "heartbeat") {
-        if (events) {
-          events.onHeartbeat && events.onHeartbeat(message.message as string);
-        }
+      const send = (type: WsMessageType, message: any) => {
         ws.send(
           JSON.stringify({
-            type: "heartbeat",
-            message: "pong",
+            type,
+            message,
           })
         );
+      };
+
+      if (message.type === "heartbeat") {
+        if (events) {
+          events.onHeartbeat && events.onHeartbeat(send);
+        }
+        send("heartbeat", "pong");
         return;
       }
 

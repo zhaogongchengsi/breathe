@@ -56,6 +56,13 @@ describe("record", () => {
       "/index file change x2
       Delete /home file"
     `);
+  });
 
+  it("isChange", () => {
+    const rec = new RecordInfo();
+    const rec2 = new RecordInfo();
+    rec.change("/index", "add");
+    expect(rec.isChange).toBe(true);
+    expect(rec2.isChange).toBe(false);
   });
 });
