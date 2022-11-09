@@ -4,9 +4,10 @@ import type {
   NextHandler,
 } from "..";
 import { BreatheConfig } from "../../config";
-import { readCodeFile, findFile, compilerSassStyle } from "../../compilers";
-import { parse, resolve } from "path";
-import { fromJSON } from "postcss";
+import { compilerSassFile, compilerStyle } from "../../compilers";
+import { join, parse, resolve } from "path";
+import { readFile } from "fs/promises";
+import { formatErr } from "../../utils";
 
 export function styleServeMiddleware(root: string, config: BreatheConfig) {
   return async (
@@ -20,6 +21,7 @@ export function styleServeMiddleware(root: string, config: BreatheConfig) {
     }
 
     const url = res.parse?.pathname;
+
     if (!url) {
       next();
       return;
@@ -32,14 +34,28 @@ export function styleServeMiddleware(root: string, config: BreatheConfig) {
 
     // @ts-ignore
     const { type } = req.query;
+    const { dir, name } = parse(url);
+    let csscode: string = "";
+    const filepath = resolve(root, join(dir.slice(1), name + "." + type));
 
-    if (type === "scss") {
+    try {
+      const file = await readFile(filepath);
+
+      if (type === "scss") {
+        csscode = await compilerSassFile(filepath);
+      } else if (type === "css") {
+        csscode = file.toString();
+      }
+
+      csscode = (await compilerStyle(csscode)).code;
+    } catch (err) {
+      res.err = {
+        code: 500,
+        massage: formatErr(err),
+      };
+      next();
     }
 
-    // if (res.parse?.query === "type=scss") {
-    //   const cssPath = resolve(root, parse(url).name + "scss");
-    // }
-
-    res.end(` .main { color: red; } `);
+    res.end(csscode);
   };
 }
