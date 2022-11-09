@@ -12,8 +12,8 @@ import {
   Mode,
 } from "./index";
 import { compileString } from "sass";
-import { copyFileSync, outputFile } from "fs-extra";
-import { readFile, readFileSync } from "fs";
+import { outputFile } from "fs-extra";
+import { readFileSync } from "fs";
 
 export interface PostHtmlStylePluginOptons {
   mode: Mode;
@@ -97,38 +97,40 @@ export function posthtmlStylePlugin({
 
       const filepath = resolve(cwd, attrurl);
 
-      const key = filepath + "-" + attrurl;
+      const key = filepath;
 
+      // 打包完成一个静态文件后 将输出文件的路径缓存起来
       const cacthFile = cacth.get(key);
 
+      const getRelative = (_path: string) => {
+        const relPath = relative(currentPath, _path)
+          .split(sep)
+          .join("/")
+          .slice(3);
+        const { name: n, dir: d, root: r } = parse(relPath);
+        return [r, d, `${n}.${origin}`].filter(Boolean).join("/");
+      };
+
       if (cacthFile) {
-        return cacthFile;
+        // 当引用的文件已存在时 重新计算相对路径
+        return getRelative(cacthFile);
       }
 
-      let fileContent = "";
-
+      // 处理文件
       if (origin === "js") {
         buildScriptSync(filepath, outfile);
       } else if (origin === "css") {
         if (type === "scss") {
-          fileContent = compilerSassFileSync(filepath);
+          compilerSassFileSync(filepath, outfile);
         } else {
-          fileContent = readFileSync(filepath).toString();
+          outputFile(outfile, readFileSync(filepath).toString());
         }
-        outputFile(outfile, fileContent);
       }
 
-      const relPath = relative(currentPath, outfile)
-        .split(sep)
-        .join("/")
-        .slice(3);
+      cacth.set(key, outfile);
 
-      const { name: n, dir: d, root: r } = parse(relPath);
-      const p = [r, d, `${n}.${origin}`].filter(Boolean).join("/");
-
-      cacth.set(key, p);
-
-      return p;
+      // 第一次计算相对路径
+      return getRelative(outfile);
     }
 
     return [root, dir, `${name}.${origin}${isDev ? `?type=${type}` : ""}`]
