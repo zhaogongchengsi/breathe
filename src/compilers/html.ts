@@ -7,6 +7,9 @@ import posthtmlInclude from "posthtml-include";
 import PostHTML from "posthtml";
 import { compilerSassFileSync, compilerScriptSync, Mode } from "./index";
 import { compileString } from "sass";
+import { copyFileSync, outputFile } from "fs-extra";
+import { readFile, readFileSync } from "fs";
+
 export interface PostHtmlStylePluginOptons {
   mode: Mode;
   cwd?: string;
@@ -59,6 +62,8 @@ export function compilerHtml(
   });
 }
 
+const cacth = new Map<string, { path: string; content: string }>();
+
 export function posthtmlStylePlugin({
   mode,
   cwd,
@@ -80,26 +85,31 @@ export function posthtmlStylePlugin({
         format({
           root,
           dir,
-          name,
+          name: `${name}-${String(Math.floor(Math.random() * 100))}`,
           ext: "." + origin,
         })
       );
+
       const filepath = resolve(cwd, attrurl);
 
-      switch (type) {
-        case "scss": {
-          compilerSassFileSync(filepath, outfile);
-          break;
+      const key = filepath + "-" + attrurl;
+
+      const cacthFile = cacth.get(key);
+
+      if (cacthFile) {
+        return cacthFile.path;
+      }
+
+      let fileContent = "";
+
+      if (origin === "js") {
+      } else if (origin === "css") {
+        if (type === "scss") {
+          fileContent = compilerSassFileSync(filepath);
+        } else {
+          fileContent = readFileSync(filepath).toString();
         }
-        case "css": {
-          break;
-        }
-        case "ts": {
-          break;
-        }
-        case "js": {
-          break;
-        }
+        outputFile(outfile, fileContent);
       }
 
       const relPath = relative(currentPath, outfile)
@@ -108,7 +118,14 @@ export function posthtmlStylePlugin({
         .slice(3);
 
       const { name: n, dir: d, root: r } = parse(relPath);
-      return [r, d, `${n}.${origin}`].filter(Boolean).join("/");
+      const p = [r, d, `${n}.${origin}`].filter(Boolean).join("/");
+
+      cacth.set(key, {
+        path: p,
+        content: fileContent,
+      });
+
+      return p;
     }
 
     return [root, dir, `${name}.${origin}${isDev ? `?type=${type}` : ""}`]
