@@ -11,6 +11,7 @@ import {
   compilerSassStyle,
   compilerSassFile,
   compilerHtml,
+  compilerScriptSync,
 } from "../";
 
 describe("script", () => {
@@ -141,3 +142,16 @@ describe("Integration default index.html", () => {
   });
 });
 
+describe("ts", () => {
+  const code = `
+    const a :string = "1"
+    const b :number = 1
+    console.log(a + b);
+  `;
+
+  it("compilerScriptSync", () => {
+    const js = compilerScriptSync(code);
+
+    console.log(js.code);
+  });
+});

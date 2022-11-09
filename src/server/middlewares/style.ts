@@ -32,21 +32,19 @@ export function styleServeMiddleware(root: string, config: BreatheConfig) {
       return;
     }
 
+    // todo: 将请求后的文件内容缓存起来 只有第一次需要读取
     // @ts-ignore
     const { type } = req.query;
     const { dir, name } = parse(url);
     let csscode: string = "";
     const filepath = resolve(root, join(dir.slice(1), name + "." + type));
-
     try {
       const file = await readFile(filepath);
-
       if (type === "scss") {
         csscode = await compilerSassFile(filepath);
       } else if (type === "css") {
         csscode = file.toString();
       }
-
       csscode = (await compilerStyle(csscode)).code;
     } catch (err) {
       res.err = {
@@ -55,7 +53,6 @@ export function styleServeMiddleware(root: string, config: BreatheConfig) {
       };
       next();
     }
-
     res.end(csscode);
   };
 }

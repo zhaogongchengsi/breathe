@@ -5,7 +5,7 @@ import posthtmlModule from "posthtml-modules";
 // @ts-ignore
 import posthtmlInclude from "posthtml-include";
 import PostHTML from "posthtml";
-import { Mode } from ".";
+import { compilerScriptSync, Mode } from "./index";
 import { compileString } from "sass";
 export interface PostHtmlStylePluginOptons {
   mode: Mode;
@@ -51,13 +51,22 @@ export function compilerHtml(
         res(result.html);
       })
       .catch((err) => {
-        rej(new Error(`The module does not exist, the path is: ${err.path}`));
+        rej(err);
       });
   });
 }
 
 export function posthtmlStylePlugin(options: PostHtmlStylePluginOptons) {
   const isDev = options.mode === "development";
+
+  const convertUrl = (attrurl: string, origin: string) => {
+    // @ts-ignore
+    const { ext, name, dir, root } = parse(attrurl);
+    const type = ext.replace(".", "");
+    return [root, dir, `${name}.${origin}${isDev ? `?type=${type}` : ""}`]
+      .filter(Boolean)
+      .join("/");
+  };
 
   return (tree: PostHTML.Node) => {
     // @ts-ignore
@@ -68,22 +77,37 @@ export function posthtmlStylePlugin(options: PostHtmlStylePluginOptons) {
         return node;
       }
 
-      // @ts-ignore
-      const { ext, name, dir, root } = parse(attrs.href);
-      const type = ext.replace(".", "");
-
-      const url = [root, dir, `${name}.css${isDev ? `?type=${type}` : ""}`]
-        .filter(Boolean)
-        .join("/");
-
       return Object.assign(node, {
         attrs: {
           ...attrs,
-          href: url,
+          href: convertUrl(attrs.href, "css"),
         },
       });
     });
 
+    tree.match({ tag: "script" }, (node) => {
+      const { attrs } = node;
+
+      // @ts-ignore
+      if (!attrs.src) {
+        return node;
+      }
+
+      // @ts-ignore
+      if (attrs.type && attrs.type === "module") {
+        return node;
+      }
+
+      return Object.assign(node, {
+        attrs: {
+          ...attrs,
+          // @ts-ignore
+          src: convertUrl(attrs.src, "js"),
+        },
+      });
+    });
+
+    // 内联代码编译
     tree.match({ tag: "style", attrs: { lang: "scss" } }, (node) => {
       const { content, attrs } = node;
 
@@ -93,10 +117,30 @@ export function posthtmlStylePlugin(options: PostHtmlStylePluginOptons) {
       const scsscode: string = content[0] ?? "";
 
       return Object.assign(node, {
-        content: compileString(scsscode).css,
+        content: [compileString(scsscode).css],
         attrs,
       });
     });
+
+    tree.match(
+      { tag: "script", attrs: { type: "text/typescript" } },
+      (node) => {
+        const { content, attrs } = node;
+        // @ts-ignore
+        delete attrs.lang;
+        // @ts-ignore
+        const tscode: string = content[0] ?? "";
+
+        return Object.assign(node, {
+          content: [
+            compilerScriptSync(tscode, options.mode, {
+              sourcemap: undefined,
+            }).code,
+          ],
+          attrs,
+        });
+      }
+    );
   };
 }
 
