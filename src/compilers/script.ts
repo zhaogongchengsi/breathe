@@ -1,4 +1,4 @@
-import { TransformOptions, transform, transformSync } from "esbuild";
+import { TransformOptions, transform, transformSync, buildSync } from "esbuild";
 import type { Mode } from ".";
 
 export async function compilerScript(
@@ -37,5 +37,26 @@ export function compilerScriptSync(
     platform: "browser",
     sourcemap: "inline",
     ...opt,
+  });
+}
+
+export function buildScriptSync(
+  input: string,
+  outfile: string,
+  optiosn?: TransformOptions
+) {
+  const opt = optiosn ?? {};
+  buildSync({
+    entryPoints: [input],
+    format: "iife",
+    bundle: true,
+    // @ts-ignore
+    loader: {
+      ".js": "js",
+      ".ts": "ts",
+    },
+    platform: "browser",
+    ...opt,
+    outfile: outfile,
   });
 }

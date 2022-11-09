@@ -5,7 +5,12 @@ import posthtmlModule from "posthtml-modules";
 // @ts-ignore
 import posthtmlInclude from "posthtml-include";
 import PostHTML from "posthtml";
-import { compilerSassFileSync, compilerScriptSync, Mode } from "./index";
+import {
+  buildScriptSync,
+  compilerSassFileSync,
+  compilerScriptSync,
+  Mode,
+} from "./index";
 import { compileString } from "sass";
 import { copyFileSync, outputFile } from "fs-extra";
 import { readFile, readFileSync } from "fs";
@@ -62,7 +67,7 @@ export function compilerHtml(
   });
 }
 
-const cacth = new Map<string, { path: string; content: string }>();
+const cacth = new Map<string, string>();
 
 export function posthtmlStylePlugin({
   mode,
@@ -97,12 +102,13 @@ export function posthtmlStylePlugin({
       const cacthFile = cacth.get(key);
 
       if (cacthFile) {
-        return cacthFile.path;
+        return cacthFile;
       }
 
       let fileContent = "";
 
       if (origin === "js") {
+        buildScriptSync(filepath, outfile);
       } else if (origin === "css") {
         if (type === "scss") {
           fileContent = compilerSassFileSync(filepath);
@@ -120,10 +126,7 @@ export function posthtmlStylePlugin({
       const { name: n, dir: d, root: r } = parse(relPath);
       const p = [r, d, `${n}.${origin}`].filter(Boolean).join("/");
 
-      cacth.set(key, {
-        path: p,
-        content: fileContent,
-      });
+      cacth.set(key, p);
 
       return p;
     }
