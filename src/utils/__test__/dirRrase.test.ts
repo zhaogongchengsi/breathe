@@ -7,8 +7,10 @@ describe("Traverse the directory", () => {
 
   it("dirRrase", async () => {
     const files: string[] = [];
+    const bases: string[] = [];
     await dirRrase(targetDir, (path, base) => {
       files.push(path);
+      bases.push(base);
     });
 
     expect(files).toEqual([
@@ -16,6 +18,5 @@ describe("Traverse the directory", () => {
       "about/index.html",
       "index.html",
     ]);
-    
   });
 });
