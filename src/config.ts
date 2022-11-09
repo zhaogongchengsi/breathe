@@ -23,20 +23,20 @@ export async function resolveConfig(
 ): Promise<BreatheConfig> {
   const configPath = resolve(root, name);
 
-  if (!(await fileExist(configPath))) {
+  if (!fileExist(configPath)) {
     return {
       server: {
         port: DEFAULT_PORT,
         host: DEFAULT_HOST,
       },
       build: {
-        outdir: "./_dist",
+        outdir: "dist",
       },
-      lib: "./lib",
-      pages: "./pages",
-      layouts: "./layouts",
-      staticDir: "./public",
-      components: "./components",
+      lib: "lib",
+      pages: "pages",
+      layouts: "layouts",
+      staticDir: "public",
+      components: "components",
     };
   }
 

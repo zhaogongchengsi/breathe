@@ -56,10 +56,13 @@ export function compilerHtml(
   });
 }
 
-export function posthtmlStylePlugin(options: PostHtmlStylePluginOptons) {
-  const isDev = options.mode === "development";
+export function posthtmlStylePlugin({ mode }: PostHtmlStylePluginOptons) {  
+  const isDev = mode === "development";
+  const isPro = mode === "production";
 
   const convertUrl = (attrurl: string, origin: string) => {
+    console.log("url: ", attrurl);
+
     // @ts-ignore
     const { ext, name, dir, root } = parse(attrurl);
     const type = ext.replace(".", "");
@@ -133,11 +136,14 @@ export function posthtmlStylePlugin(options: PostHtmlStylePluginOptons) {
 
         return Object.assign(node, {
           content: [
-            compilerScriptSync(tscode, options.mode, {
+            compilerScriptSync(tscode, mode, {
               sourcemap: undefined,
             }).code,
           ],
-          attrs,
+          attrs: {
+            ...attrs,
+            type: "text/javascript",
+          },
         });
       }
     );
