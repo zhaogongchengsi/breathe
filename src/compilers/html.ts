@@ -1,5 +1,5 @@
 import posthtml, { Plugin } from "posthtml";
-import { dirname, parse, relative, resolve, sep } from "path";
+import { dirname, format, parse, relative, resolve, sep } from "path";
 // @ts-ignore
 import posthtmlModule from "posthtml-modules";
 // @ts-ignore
@@ -74,7 +74,16 @@ export function posthtmlStylePlugin({
     const type = ext.slice(1);
 
     if (isPro && cwd && outdir && currentPath) {
-      const outfile = resolve(cwd, outdir, attrurl);
+      const outfile = resolve(
+        cwd,
+        outdir,
+        format({
+          root,
+          dir,
+          name,
+          ext: "." + origin,
+        })
+      );
       const filepath = resolve(cwd, attrurl);
 
       switch (type) {
