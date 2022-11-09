@@ -21,7 +21,14 @@ export async function build(cwd: string, options: BuildOption) {
       root: cwd,
       modules: layouts,
       mode: "production",
-      plugins: [posthtmlStylePlugin({ mode: "production" })],
+      plugins: [
+        posthtmlStylePlugin({
+          mode: "production",
+          cwd,
+          outdir: build.outdir,
+          currentPath: outdir,
+        }),
+      ],
     });
 
     await outputFile(outdir, format(html, { semi: false, parser: "html" }));

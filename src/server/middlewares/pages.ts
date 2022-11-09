@@ -70,7 +70,7 @@ export function pagesServeMiddleware(
 
       res.end(html);
     } catch (err: any) {
-      console.log(err)
+      console.log(err);
       res.err = {
         code: 500,
         massage: formatErr(err),

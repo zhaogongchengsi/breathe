@@ -1,5 +1,6 @@
+import { outputFile, outputFileSync } from "fs-extra";
 import postcss, { AcceptedPlugin } from "postcss";
-import sass, { compileAsync, compileString } from "sass";
+import sass, { compileAsync, compileString, compile } from "sass";
 
 /**
  *
@@ -62,7 +63,15 @@ export function compilerSassStyleSync(code: string) {
 export async function compilerSassFile(form: string, to?: string) {
   const res = await compileAsync(form);
   if (to) {
-    console.log("写入css");
+    await outputFile(to, res.css);
+  }
+  return res.css;
+}
+
+export function compilerSassFileSync(form: string, to?: string) {
+  const res = compile(form);
+  if (to) {
+    outputFileSync(to, res.css);
   }
   return res.css;
 }

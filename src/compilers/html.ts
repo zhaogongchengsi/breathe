@@ -1,14 +1,17 @@
 import posthtml, { Plugin } from "posthtml";
-import { parse, resolve } from "path";
+import { dirname, parse, relative, resolve, sep } from "path";
 // @ts-ignore
 import posthtmlModule from "posthtml-modules";
 // @ts-ignore
 import posthtmlInclude from "posthtml-include";
 import PostHTML from "posthtml";
-import { compilerScriptSync, Mode } from "./index";
+import { compilerSassFileSync, compilerScriptSync, Mode } from "./index";
 import { compileString } from "sass";
 export interface PostHtmlStylePluginOptons {
   mode: Mode;
+  cwd?: string;
+  outdir?: string;
+  currentPath?: string;
 }
 
 export interface CompilerHtmlOptions {
@@ -56,16 +59,49 @@ export function compilerHtml(
   });
 }
 
-export function posthtmlStylePlugin({ mode }: PostHtmlStylePluginOptons) {  
+export function posthtmlStylePlugin({
+  mode,
+  cwd,
+  outdir,
+  currentPath,
+}: PostHtmlStylePluginOptons) {
   const isDev = mode === "development";
   const isPro = mode === "production";
 
   const convertUrl = (attrurl: string, origin: string) => {
-    console.log("url: ", attrurl);
-
     // @ts-ignore
     const { ext, name, dir, root } = parse(attrurl);
-    const type = ext.replace(".", "");
+    const type = ext.slice(1);
+
+    if (isPro && cwd && outdir && currentPath) {
+      const outfile = resolve(cwd, outdir, attrurl);
+      const filepath = resolve(cwd, attrurl);
+
+      switch (type) {
+        case "scss": {
+          compilerSassFileSync(filepath, outfile);
+          break;
+        }
+        case "css": {
+          break;
+        }
+        case "ts": {
+          break;
+        }
+        case "js": {
+          break;
+        }
+      }
+
+      const relPath = relative(currentPath, outfile)
+        .split(sep)
+        .join("/")
+        .slice(3);
+
+      const { name: n, dir: d, root: r } = parse(relPath);
+      return [r, d, `${n}.${origin}`].filter(Boolean).join("/");
+    }
+
     return [root, dir, `${name}.${origin}${isDev ? `?type=${type}` : ""}`]
       .filter(Boolean)
       .join("/");

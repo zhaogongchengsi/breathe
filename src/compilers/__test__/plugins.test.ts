@@ -18,7 +18,7 @@ describe("style loder", () => {
     expect(str).toContain("type=scss");
   });
 
-  it("style pro", async () => {
+  it.skip("style pro", async () => {
     const html = `<head>
             <link rel="stylesheet" href="index.scss">
     </head>`;
