@@ -5,9 +5,9 @@
     "build": {
         "outdir": "./_dist"
     },
-    "lib": "./lib",
+    "lib": "lib",
     "pages": "pages",
     "layouts": "layouts",
-    "staticDir": "./public",
-    "components": "./components"
+    "staticDir": "public",
+    "components": "components"
 }

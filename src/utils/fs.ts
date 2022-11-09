@@ -122,3 +122,35 @@ export async function createFileChtch(
     },
   };
 }
+
+export async function dirRrase(
+  path: string,
+  cb: (path: string, base: string) => void | Promise<void>,
+  s: string = "/"
+) {
+  const pubPath = path;
+
+  async function rease(
+    p: string,
+    cb: (path: string, base: string) => void | Promise<void>
+  ) {
+    const files = await readdir(p);
+
+    for await (const file of files) {
+      const base = resolve(p, file);
+      const chiFile = statSync(base);
+
+      if (chiFile.isFile()) {
+        const _p = base.replace(pubPath, "");
+        const _p2 = _p.split(sep).filter(Boolean).join(s);
+        cb && (await cb(_p2, base));
+      }
+
+      if (chiFile.isDirectory()) {
+        await rease(base, cb);
+      }
+    }
+  }
+
+  return await rease(path, cb);
+}
