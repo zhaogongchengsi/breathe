@@ -1,35 +1,33 @@
-import { BreatheConfig } from "../config";
-import { join, resolve } from "path";
-import { statSync, readdirSync } from "fs";
+import { join, resolve } from 'path'
+import { readdirSync, statSync } from 'fs'
+import type { BreatheConfig } from '../config'
 
-export type AssetsInfo = {};
+export interface AssetsInfo {}
 
 export async function createAssetsInfo(
   root: string,
-  config: BreatheConfig
+  config: BreatheConfig,
 ): Promise<AssetsInfo> {
-  return {};
+  return {}
 }
 
 export function directoryScan(root: string, path: string) {
-  let paths: string[] = [];
+  let paths: string[] = []
 
-  const base = resolve(root, path);
+  const base = resolve(root, path)
 
-  const dirs = readdirSync(base);
+  const dirs = readdirSync(base)
 
   dirs.forEach((dir) => {
-    const _p = resolve(base, dir);
-    const start = statSync(_p);
-    if (start.isDirectory()) {
-      paths = paths.concat(directoryScan(base, dir));
-    } else {
-      paths.push(_p);
-    }
-  });
+    const _p = resolve(base, dir)
+    const start = statSync(_p)
+    if (start.isDirectory())
+      paths = paths.concat(directoryScan(base, dir))
+    else
+      paths.push(_p)
+  })
 
-  return paths;
+  return paths
 }
 
-
-export function createRouterPath () {}
+export function createRouterPath() {}

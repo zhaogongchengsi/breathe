@@ -1,6 +1,6 @@
-import { statSync } from "fs";
-import { readdir, readFile } from "fs/promises";
-import { join, parse, resolve, sep } from "path";
+import { statSync } from 'fs'
+import { readFile, readdir } from 'fs/promises'
+import { join, parse, resolve, sep } from 'path'
 
 /**
  *
@@ -9,99 +9,101 @@ import { join, parse, resolve, sep } from "path";
  */
 export function fileExist(path: string): boolean {
   try {
-    const state = statSync(path);
-    if (!state.isDirectory()) return true;
-    return false;
-  } catch {
-    return false;
+    const state = statSync(path)
+    if (!state.isDirectory())
+      return true
+    return false
+  }
+  catch {
+    return false
   }
 }
 
-export type DirChtch = Map<string, string>;
+export type DirChtch = Map<string, string>
 export async function catalogScan(
   root: string,
   path: string,
   cb?: (path: string, value: string) => void | Promise<void>,
-  splitSep: string = "/"
+  splitSep = '/',
 ): Promise<DirChtch> {
-  const catchFile: DirChtch = new Map<string, string>();
-  const targetDir = resolve(root, path);
+  const catchFile: DirChtch = new Map<string, string>()
+  const targetDir = resolve(root, path)
 
-  const files = await readdir(targetDir);
+  const files = await readdir(targetDir)
 
   for await (const file of files) {
-    const target = join(path, file);
-    const base = resolve(root, target);
-    const chiFile = statSync(base);
+    const target = join(path, file)
+    const base = resolve(root, target)
+    const chiFile = statSync(base)
 
     if (chiFile.isFile()) {
-      const fileBuff = await readFile(base);
-      const { dir, name } = parse(target);
-      const key = [...dir.split(sep), name].join(splitSep);
-      const fileStr = fileBuff.toString();
-      cb && (await cb(base, fileStr), fileStr);
-      catchFile.set(key, fileStr);
+      const fileBuff = await readFile(base)
+      const { dir, name } = parse(target)
+      const key = [...dir.split(sep), name].join(splitSep)
+      const fileStr = fileBuff.toString()
+      cb && (await cb(base, fileStr), fileStr)
+      catchFile.set(key, fileStr)
     }
 
     if (chiFile.isDirectory()) {
-      const fileCache = await catalogScan(root, target, cb, splitSep);
-      fileCache.forEach((value, key) => catchFile.set(key, value));
+      const fileCache = await catalogScan(root, target, cb, splitSep)
+      fileCache.forEach((value, key) => catchFile.set(key, value))
     }
   }
 
-  return catchFile;
+  return catchFile
 }
 
-export type CreateFileChtch = {
-  find(path: string): string | undefined;
-  update(pathkey: string, value?: string | undefined): Promise<void>;
-  deleteChtch(pathkey: string): void;
-  clearChtch(): void;
+export interface CreateFileChtch {
+  find(path: string): string | undefined
+  update(pathkey: string, value?: string | undefined): Promise<void>
+  deleteChtch(pathkey: string): void
+  clearChtch(): void
   forEach(
     cb: (
       key: string,
       value: string,
       opt: {
-        root: string;
-        path: string;
-        sep: string;
+        root: string
+        path: string
+        sep: string
       }
     ) => void
-  ): void;
-};
+  ): void
+}
 
 export async function createFileChtch(
   root: string,
   path: string,
-  splitSep: string = "/"
+  splitSep = '/',
 ) {
-  const chtch = await catalogScan(root, path, undefined, splitSep);
+  const chtch = await catalogScan(root, path, undefined, splitSep)
 
   const key = (pathkey: string): string => {
-    const target = join(path, pathkey);
-    const { dir, name } = parse(target);
-    return [...dir.split(sep), name].join(splitSep);
-  };
+    const target = join(path, pathkey)
+    const { dir, name } = parse(target)
+    return [...dir.split(sep), name].join(splitSep)
+  }
 
   return {
     find(path: string) {
-      return chtch.get(key(path));
+      return chtch.get(key(path))
     },
     async update(pathkey: string, value?: string) {
       if (value) {
-        chtch.set(key(pathkey), value || "");
-        return;
-      } else {
-        const filePath = resolve(root, join(path, pathkey));
-        const fileBuff = await readFile(filePath);
-        chtch.set(key(pathkey), fileBuff.toString());
+        chtch.set(key(pathkey), value || '')
+      }
+      else {
+        const filePath = resolve(root, join(path, pathkey))
+        const fileBuff = await readFile(filePath)
+        chtch.set(key(pathkey), fileBuff.toString())
       }
     },
     deleteChtch(pathkey: string) {
-      chtch.delete(key(pathkey));
+      chtch.delete(key(pathkey))
     },
     clearChtch() {
-      chtch.clear();
+      chtch.clear()
     },
 
     async forEach(
@@ -109,48 +111,47 @@ export async function createFileChtch(
         key: string,
         value: string,
         opt: { root: string; path: string; sep: string }
-      ) => void | Promise<void>
+      ) => void | Promise<void>,
     ) {
       for await (const [key, value] of chtch) {
-        cb &&
-          (await cb(key, value, {
+        cb
+          && (await cb(key, value, {
             root,
             path,
             sep,
-          }));
+          }))
       }
     },
-  };
+  }
 }
 
 export async function dirRrase(
   path: string,
   cb: (path: string, base: string) => void | Promise<void>,
-  s: string = "/"
+  s = '/',
 ) {
-  const pubPath = path;
+  const pubPath = path
 
   async function rease(
     p: string,
-    cb: (path: string, base: string) => void | Promise<void>
+    cb: (path: string, base: string) => void | Promise<void>,
   ) {
-    const files = await readdir(p);
+    const files = await readdir(p)
 
     for await (const file of files) {
-      const base = resolve(p, file);
-      const chiFile = statSync(base);
+      const base = resolve(p, file)
+      const chiFile = statSync(base)
 
       if (chiFile.isFile()) {
-        const _p = base.replace(pubPath, "");
-        const _p2 = _p.split(sep).filter(Boolean).join(s);
-        cb && (await cb(_p2, base));
+        const _p = base.replace(pubPath, '')
+        const _p2 = _p.split(sep).filter(Boolean).join(s)
+        cb && (await cb(_p2, base))
       }
 
-      if (chiFile.isDirectory()) {
-        await rease(base, cb);
-      }
+      if (chiFile.isDirectory())
+        await rease(base, cb)
     }
   }
 
-  return await rease(path, cb);
+  return await rease(path, cb)
 }

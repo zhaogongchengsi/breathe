@@ -1,28 +1,28 @@
-import { describe, it, expect } from "vitest";
-import { resolveConfig, DEFAULT_PORT, DEFAULT_HOST } from "../config";
+import { describe, expect, it } from 'vitest'
+import { DEFAULT_HOST, DEFAULT_PORT, resolveConfig } from '../config'
 
-describe("config", () => {
-  it("resolveConfig", async () => {
-    const conf = await resolveConfig(__dirname, "config.json");
+describe('config', () => {
+  it('resolveConfig', async () => {
+    const conf = await resolveConfig(__dirname, 'config.json')
 
     expect(conf).toEqual({
       server: {
         port: 3030,
-        host: "0.0.0.0",
+        host: '0.0.0.0',
       },
       build: {
-        outdir: "./_dist",
+        outdir: './_dist',
       },
-      lib: "./lib",
-      pages: "./pages",
-      layouts: "./layouts",
-      staticDir: "./public123",
-      components: "./components",
-    });
-  });
+      lib: './lib',
+      pages: './pages',
+      layouts: './layouts',
+      staticDir: './public123',
+      components: './components',
+    })
+  })
 
-  it("resolveConfig (The specified configuration file does not exist)", async () => {
-    const conf = await resolveConfig(__dirname, "");
+  it('resolveConfig (The specified configuration file does not exist)', async () => {
+    const conf = await resolveConfig(__dirname, '')
 
     expect(conf).toEqual({
       server: {
@@ -30,13 +30,13 @@ describe("config", () => {
         host: DEFAULT_HOST,
       },
       build: {
-        outdir: "./_dist",
+        outdir: 'dist',
       },
-      lib: "./lib",
-      pages: "./pages",
-      layouts: "./layouts",
-      staticDir: "./public",
-      components: "./components",
-    });
-  });
-});
+      lib: 'lib',
+      pages: 'pages',
+      layouts: 'layouts',
+      staticDir: 'public',
+      components: 'components',
+    })
+  })
+})

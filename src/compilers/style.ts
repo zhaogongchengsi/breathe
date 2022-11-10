@@ -1,6 +1,7 @@
-import { outputFile, outputFileSync } from "fs-extra";
-import postcss, { AcceptedPlugin } from "postcss";
-import sass, { compileAsync, compileString, compile } from "sass";
+import { outputFile, outputFileSync } from 'fs-extra'
+import type { AcceptedPlugin } from 'postcss'
+import postcss from 'postcss'
+import sass, { compile, compileAsync, compileString } from 'sass'
 
 /**
  *
@@ -14,7 +15,7 @@ export function compilerStyle(
   css: string,
   plugins: AcceptedPlugin[] = [],
   from?: string,
-  to?: string
+  to?: string,
 ): Promise<{ code: string; map: string }> {
   return new Promise((res, rej) => {
     postcss(plugins)
@@ -23,10 +24,10 @@ export function compilerStyle(
         res({
           code: result.css,
           map: result.map?.toString(),
-        });
+        })
       })
-      .catch(rej);
-  });
+      .catch(rej)
+  })
 }
 
 /**
@@ -37,12 +38,13 @@ export function compilerStyle(
 export function compilerSassStyle(code: string): Promise<string> {
   return new Promise((res, rej) => {
     try {
-      let cssString = sass.compileString(code);
-      res(cssString.css);
-    } catch (err) {
-      rej(err);
+      const cssString = sass.compileString(code)
+      res(cssString.css)
     }
-  });
+    catch (err) {
+      rej(err)
+    }
+  })
 }
 
 /**
@@ -51,7 +53,7 @@ export function compilerSassStyle(code: string): Promise<string> {
  * @description 不支持通过 `@import` 引入指定的scss文件 使用同步的方式编译小段scss代码
  */
 export function compilerSassStyleSync(code: string) {
-  return compileString(code).css;
+  return compileString(code).css
 }
 
 /**
@@ -61,17 +63,17 @@ export function compilerSassStyleSync(code: string) {
  * @description 若指定 输出目录 则直接输出 未指定输出目录 则直接输出编译后的css 支持通过 `@import` 引入指定的scss文件
  */
 export async function compilerSassFile(form: string, to?: string) {
-  const res = await compileAsync(form);
-  if (to) {
-    await outputFile(to, res.css);
-  }
-  return res.css;
+  const res = await compileAsync(form)
+  if (to)
+    await outputFile(to, res.css)
+
+  return res.css
 }
 
 export function compilerSassFileSync(form: string, to?: string) {
-  const res = compile(form);
-  if (to) {
-    outputFileSync(to, res.css);
-  }
-  return res.css;
+  const res = compile(form)
+  if (to)
+    outputFileSync(to, res.css)
+
+  return res.css
 }

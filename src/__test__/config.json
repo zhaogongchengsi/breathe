@@ -1,14 +1,14 @@
 {
-    "server": {
-        "port": 3030,
-        "host": "0.0.0.0"
-    },
-    "build": {
-        "outdir": "./_dist"
-    },
-    "lib": "./lib",
-    "pages": "./pages",
-    "layouts": "./layouts",
-    "staticDir": "./public123",
-    "components": "./components"
+  "server": {
+    "port": 3030,
+    "host": "0.0.0.0"
+  },
+  "build": {
+    "outdir": "./_dist"
+  },
+  "lib": "./lib",
+  "pages": "./pages",
+  "layouts": "./layouts",
+  "staticDir": "./public123",
+  "components": "./components"
 }

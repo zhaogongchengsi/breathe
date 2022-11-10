@@ -1,29 +1,36 @@
-import { resolve } from "path";
-import sirv from "sirv";
+import { resolve } from 'path'
+import sirv from 'sirv'
 import type {
-  BreatheServerResponse,
   BreatheServerRequest,
+  BreatheServerResponse,
   NextHandler,
-} from "..";
-import { BreatheConfig } from "../../config";
+} from '..'
+import type { BreatheConfig } from '../../config'
+
+const STATICRESOURCERTPE = ['.png', '.jpeg', '.jpg', '.svg']
 
 export function staicServeMiddleware(
   root: string,
-  { staticDir }: BreatheConfig
+  { staticDir }: BreatheConfig,
 ) {
-  const staticPath = resolve(root, staticDir);
+  const staticPath = resolve(root, staticDir)
 
   const serve = sirv(staticPath, {
     maxAge: 31536000, // 1Y
     immutable: true,
     dev: true,
-  });
+  })
 
   return function (
     req: BreatheServerRequest,
     res: BreatheServerResponse,
-    next: NextHandler
+    next: NextHandler,
   ) {
-    serve(req, res, next);
-  };
+    const stactReg = new RegExp(`(\\.?\\/?${staticDir}\\/).*(${STATICRESOURCERTPE.join('|')})`)
+
+    if (stactReg.test(req.url as string))
+      serve(req, res, next)
+    else
+      next()
+  }
 }

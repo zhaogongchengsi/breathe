@@ -1,23 +1,24 @@
-import { statSync } from "fs";
-import { readFile } from "fs/promises";
-import { join, parse, resolve, sep } from "path";
-import { e } from "vitest/dist/index-6e18a03a";
+import { statSync } from 'fs'
+import { readFile } from 'fs/promises'
+import { join, parse, resolve, sep } from 'path'
+import { e } from 'vitest/dist/index-6e18a03a'
 
 export async function readCodeFile(path: string): Promise<string> {
-  let file;
+  let file
   try {
-    file = await readFile(path);
-  } catch (err) {
-    throw new Error(`File read failed -->${path}`);
+    file = await readFile(path)
+  }
+  catch (err) {
+    throw new Error(`File read failed -->${path}`)
   }
 
-  return file.toString();
+  return file.toString()
 }
 
-export type FindFileoptions = {
-  ext?: ".js" | ".html" | ".css";
-  defaultFile?: string;
-};
+export interface FindFileoptions {
+  ext?: '.js' | '.html' | '.css'
+  defaultFile?: string
+}
 
 /**
  * @params basepath 寻找的目录
@@ -29,45 +30,42 @@ export type FindFileoptions = {
 export function findFile(
   basepath: string,
   filepath: string,
-  options?: FindFileoptions
+  options?: FindFileoptions,
 ): string | undefined {
-  const { ext, defaultFile } = Object.assign({}, options);
+  const { ext, defaultFile } = Object.assign({}, options)
 
-  if (filepath.startsWith("/")) {
-    filepath = filepath.substring(1);
-  }
+  if (filepath.startsWith('/'))
+    filepath = filepath.substring(1)
 
-  let { dir, name, ext: ex } = parse(filepath);
+  const { dir, name, ext: ex } = parse(filepath)
 
-  const url = resolve(basepath, filepath);
+  const url = resolve(basepath, filepath)
 
-  const stat = statSync(url);
+  const stat = statSync(url)
 
-  if (stat.isFile()) {
-    return url;
-  }
+  if (stat.isFile())
+    return url
 
   const getExt = () => {
-    return ext ? ext : ex || "";
-  };
+    return ext || ex || ''
+  }
 
   if (defaultFile) {
     const fileUrl = [join(basepath, filepath), defaultFile + getExt()].join(
-      sep
-    );
+      sep,
+    )
     try {
-      const state = statSync(fileUrl);
-      if (state.isFile()) {
-        return fileUrl;
-      }
-    } catch {
-      throw new Error(
-        `The target is a folder, the provided default file does not exist :${fileUrl}`
-      );
+      const state = statSync(fileUrl)
+      if (state.isFile())
+        return fileUrl
     }
-  } else {
-    throw new Error(`The target is a folder and no default file is provided`);
+    catch {
+      throw new Error(
+        `The target is a folder, the provided default file does not exist :${fileUrl}`,
+      )
+    }
   }
-
-  return;
+  else {
+    throw new Error('The target is a folder and no default file is provided')
+  }
 }

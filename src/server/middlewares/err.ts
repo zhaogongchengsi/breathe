@@ -1,25 +1,25 @@
-import { BreatheConfig } from "../../config";
+import type { BreatheConfig } from '../../config'
 import type {
-  BreatheServerResponse,
   BreatheServerRequest,
+  BreatheServerResponse,
   NextHandler,
-} from "..";
+} from '..'
 
 export function serverErrotMiddleware(root: string, config: BreatheConfig) {
   return (
     req: BreatheServerRequest,
     res: BreatheServerResponse,
-    next: NextHandler
+    next: NextHandler,
   ) => {
     if (!res.err) {
-      next();
-      return;
+      next()
+      return
     }
 
     res.end(
-      "<h1 style='color: red;'> Error 500 <br> <p>" +
-        res.err.massage +
-        " </p>  </h1>"
-    );
-  };
+      `<h1 style='color: red;'> Error 500 <br> <p>${
+        res.err.massage
+         } </p>  </h1>`,
+    )
+  }
 }

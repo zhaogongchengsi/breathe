@@ -1,118 +1,119 @@
-import type { IncomingMessage, ServerResponse } from "http";
-import { join, sep } from "path";
-import { readFile } from "fs/promises";
-import polka from "polka";
-import colors from "picocolors";
-import compression from "compression";
-import type { ServerOption } from "../cli";
+import type { IncomingMessage, ServerResponse } from 'http'
+import { join, sep } from 'path'
+import { readFile } from 'fs/promises'
+import polka from 'polka'
+import colors from 'picocolors'
+import compression from 'compression'
+import type { ServerOption } from '../cli'
 
 import {
   CONFIG_NAME,
   DEFAULT_HOST,
   DEFAULT_PORT,
   resolveConfig,
-} from "../config";
-import { createFileChtch, RecordInfo } from "../utils";
-import { createWatcher } from "../watch";
+} from '../config'
+import { RecordInfo, createFileChtch } from '../utils'
+import { createWatcher } from '../watch'
 import {
   pagesServeMiddleware,
   serverErrotMiddleware,
   staicServeMiddleware,
   styleServeMiddleware,
   urlParseMiddleware,
-} from "./middlewares";
+} from './middlewares'
 
-import { createWsServer, WsMessage } from "./ws";
-
-export const WS_PATH = "ws";
+import type { WsMessage } from './ws'
+import { createWsServer } from './ws'
 
 export interface Optopns extends ServerOption {
-  configPath: string;
+  configPath: string
 }
 
 export interface ParseUrlInfo {
-  search: string | null | undefined;
-  query: string | null | undefined;
-  pathname: string;
-  path: string;
-  href: string;
-  _raw: string;
+  search: string | null | undefined
+  query: string | null | undefined
+  pathname: string
+  path: string
+  href: string
+  _raw: string
 }
 
 export interface ErrorInfo {
-  code: number;
-  massage: string;
+  code: number
+  massage: string
 }
 
 export interface BreatheServerResponse extends ServerResponse<IncomingMessage> {
-  _url?: string;
-  html?: string;
-  err?: ErrorInfo;
-  parse?: ParseUrlInfo;
+  _url?: string
+  html?: string
+  err?: ErrorInfo
+  parse?: ParseUrlInfo
 }
 
-export type NextHandler = () => void | Promise<void>;
+export type NextHandler = () => void | Promise<void>
 
 export interface BreatheServerRequest extends IncomingMessage {}
 
 export async function createDevServer(root: string, option: Optopns) {
-  const conf = await resolveConfig(root, option.configPath ?? CONFIG_NAME);
+  const conf = await resolveConfig(root, option.configPath ?? CONFIG_NAME)
 
-  const { server } = conf;
+  const { server } = conf
 
   const { port, host } = {
     host: option.host ?? server.host ?? DEFAULT_HOST,
     port: option.port ?? server.port ?? DEFAULT_PORT,
-  };
+  }
 
-  const wsPort = port + 1;
+  const wsPort = port + 1
 
-  const rec = new RecordInfo();
+  const rec = new RecordInfo()
 
-  const fileCatch = await createFileChtch(root, conf.pages, "/");
+  const fileCatch = await createFileChtch(root, conf.pages, '/')
 
-  const wss = createWsServer(wsPort, host);
+  const wss = createWsServer(wsPort, host)
 
   const broadcast = (message: WsMessage) => {
     wss.clients.forEach((ws) => {
-      ws.send(JSON.stringify(message));
-    });
-  };
+      ws.send(JSON.stringify(message))
+    })
+  }
 
   const getKey = (path: string) => {
-    return path.replace(new RegExp(`^${conf.pages}\\${sep}`), "");
-  };
+    return path.replace(new RegExp(`^${conf.pages}\\${sep}`), '')
+  }
 
   const changeHandler = async (path: string) => {
-    const filePath = join(root, path);
-    const code = await readFile(filePath, { encoding: "utf8" });
-    fileCatch.update(getKey(path), code);
-    broadcast({ type: "fileChange", message: getKey(path).replace(sep, "/") });
-  };
+    const filePath = join(root, path)
+    const code = await readFile(filePath, { encoding: 'utf8' })
+    await fileCatch.update(getKey(path), code)
+    broadcast({ type: 'fileChange', message: getKey(path).replace(sep, '/') })
+  }
 
   createWatcher(conf.pages, {
     cwd: root,
-    sep: "/",
+    sep: '/',
     async onChange(path) {
-      changeHandler(path);
-      rec.change(getKey(path), "update");
+      await changeHandler(path)
+      rec.change(getKey(path), 'update')
     },
     async onAdd(type, path) {
-      if (type === "dir") return;
-      changeHandler(path);
+      if (type === 'dir')
+        return
+      await changeHandler(path)
     },
     async onDelete(type, path) {
-      if (type === "dir") return;
-      fileCatch.deleteChtch(getKey(path));
-      rec.change(getKey(path), "delete");
+      if (type === 'dir')
+        return
+      fileCatch.deleteChtch(getKey(path))
+      rec.change(getKey(path), 'delete')
     },
-  });
+  })
 
   const app = polka({
     onNoMatch: (req, res) => {
-      res.end(`<h1> Not Found  ${req.url}  </h1>`);
+      res.end(`<h1> Not Found  ${req.url}  </h1>`)
     },
-  });
+  })
 
   app
     .use(
@@ -121,17 +122,18 @@ export async function createDevServer(root: string, option: Optopns) {
       urlParseMiddleware(root, conf),
       pagesServeMiddleware(root, conf, fileCatch, { port: wsPort }),
       styleServeMiddleware(root, conf),
-      serverErrotMiddleware(root, conf)
+      serverErrotMiddleware(root, conf),
     )
 
-    .get("*", async (req: BreatheServerRequest, res: BreatheServerResponse) => {
+    .get('*', async (req: BreatheServerRequest, res: BreatheServerResponse) => {
       //   const html = await res.html?.render();
-      res.end("<h1> defaule hello world </h1>");
+      res.end('<h1> defaule hello world </h1>')
     })
 
     .listen(port, (err: any) => {
-      if (err) throw err;
-      console.log(colors.green(`http -> http://${host}:${port}`));
-      console.log(colors.green(`ws -> ws://${host}:/${wsPort}`));
-    });
+      if (err)
+        throw err
+      // eslint-disable-next-line no-console
+      console.log(colors.green(`http -> http://${host}:${port}`))
+    })
 }

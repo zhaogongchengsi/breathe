@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { createCli } from "../dist/index.mjs";
-const cli = createCli();
+import { createCli } from '../dist/index.mjs'
+const cli = createCli()
 
-cli.help();
-cli.parse();
+cli.help()
+cli.parse()

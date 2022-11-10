@@ -1,17 +1,17 @@
-import { WsMessageType } from "./ws";
+import type { WsMessageType } from './ws'
 
 export interface ClientOption {
-  port: number;
-  host?: string;
-  heartRate?: number;
-  heartName?: Omit<WsMessageType, "message">;
+  port: number
+  host?: string
+  heartRate?: number
+  heartName?: Omit<WsMessageType, 'message'>
 }
 
 export function injectClientCode({
   port,
-  host = "localhost",
+  host = 'localhost',
   heartRate = 1500,
-  heartName = "heartbeat",
+  heartName = 'heartbeat',
 }: ClientOption) {
   return `<script>;
   (function () {
@@ -38,5 +38,5 @@ export function injectClientCode({
         }
         connect()
      })();</script>
-    `;
+    `
 }

@@ -1,21 +1,21 @@
+import polkaParse from '@polka/url'
 import type {
-  BreatheServerResponse,
   BreatheServerRequest,
+  BreatheServerResponse,
   NextHandler,
-} from "..";
-import { BreatheConfig } from "../../config";
-// @ts-ignore
-import polkaParse from "@polka/url";
+} from '..'
+import type { BreatheConfig } from '../../config'
+// @ts-expect-error
 
 export function urlParseMiddleware(root: string, config: BreatheConfig) {
   return (
     req: BreatheServerRequest,
     res: BreatheServerResponse,
-    next: NextHandler
+    next: NextHandler,
   ) => {
-    const info = polkaParse(req);
-    res._url = info.pathname;
-    res.parse = info;
-    next();
-  };
+    const info = polkaParse(req)
+    res._url = info.pathname
+    res.parse = info
+    next()
+  }
 }

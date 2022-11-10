@@ -2,12 +2,12 @@
   "name": "example",
   "version": "1.0.0",
   "description": "",
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
   "main": "index.js",
   "scripts": {
     "dev": "bs --port=3030",
     "build": "bs build"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  }
 }

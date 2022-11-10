@@ -1,2 +1,1 @@
-
-function fo(a, b) {return a + b;}
+function fo(a, b) { return a + b }

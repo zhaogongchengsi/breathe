@@ -1,5 +1,5 @@
 function foo3(a: number, b: number) {
-  return a + b;
+  return a + b
 }
 
-console.log(foo3(1, 2));
+console.log(foo3(1, 2))
