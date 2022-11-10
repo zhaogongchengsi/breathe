@@ -18,6 +18,7 @@ export function staicServeMiddleware(
   const serve = sirv(staticPath, {
     maxAge: 31536000, // 1Y
     immutable: true,
+    etag: true,
     dev: true,
   })
 
@@ -26,11 +27,11 @@ export function staicServeMiddleware(
     res: BreatheServerResponse,
     next: NextHandler,
   ) {
-    const stactReg = new RegExp(`(\\.?\\/?${staticDir}\\/).*(${STATICRESOURCERTPE.join('|')})`)
+    const stactReg = new RegExp(`(\\.?\\/?${staticDir}\\/)(.*)(${STATICRESOURCERTPE.join('|')})`)
+    req.url = req.url?.replace(stactReg, (match, p1, p2, p3) => {
+      return `/${p2}${p3}`
+    })
 
-    if (stactReg.test(req.url as string))
-      serve(req, res, next)
-    else
-      next()
+    serve(req, res, next)
   }
 }

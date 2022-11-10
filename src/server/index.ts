@@ -1,9 +1,10 @@
 import type { IncomingMessage, ServerResponse } from 'http'
-import { join, sep } from 'path'
+import { join, resolve, sep } from 'path'
 import { readFile } from 'fs/promises'
 import polka from 'polka'
 import colors from 'picocolors'
 import compression from 'compression'
+import sirv from 'sirv'
 import type { ServerOption } from '../cli'
 
 import {
@@ -109,11 +110,16 @@ export async function createDevServer(root: string, option: Optopns) {
     },
   })
 
-  const app = polka({
-    onNoMatch: (req, res) => {
-      res.end(`<h1> Not Found  ${req.url}  </h1>`)
-    },
+  const staticPath = resolve(root, conf.staticDir)
+
+  const serve = sirv(staticPath, {
+    maxAge: 31536000, // 1Y
+    immutable: true,
+    etag: true,
+    dev: true,
   })
+
+  const app = polka()
 
   app
     .use(
@@ -124,11 +130,6 @@ export async function createDevServer(root: string, option: Optopns) {
       styleServeMiddleware(root, conf),
       serverErrotMiddleware(root, conf),
     )
-
-    .get('*', async (req: BreatheServerRequest, res: BreatheServerResponse) => {
-      //   const html = await res.html?.render();
-      res.end('<h1> defaule hello world </h1>')
-    })
 
     .listen(port, (err: any) => {
       if (err)
